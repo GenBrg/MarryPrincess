@@ -1,25 +1,24 @@
-#include "ColorTextureProgram.hpp"
+#include "Texture2DProgram.hpp"
 
 #include "gl_compile_program.hpp"
 #include "gl_errors.hpp"
 
-Load< ColorTextureProgram > color_texture_program(LoadTagEarly);
+Load<Texture2DProgram> texture2d_program(LoadTagEarly);
 
-ColorTextureProgram::ColorTextureProgram() {
+Texture2DProgram::Texture2DProgram() {
 	//Compile vertex and fragment shaders using the convenient 'gl_compile_program' helper function:
 	program = gl_compile_program(
 		//vertex shader:
 		"#version 330\n"
-		"uniform mat4 OBJECT_TO_CLIP;\n"
 		"in vec4 Position;\n"
 		"in vec4 Color;\n"
 		"in vec2 TexCoord;\n"
-		"out vec4 color;\n"
 		"out vec2 texCoord;\n"
+		"out vec4 color;\n"
 		"void main() {\n"
-		"	gl_Position = OBJECT_TO_CLIP * Position;\n"
-		"	color = Color;\n"
+		"	gl_Position = Position;\n"
 		"	texCoord = TexCoord;\n"
+		"	color = Color;\n"
 		"}\n"
 	,
 		//fragment shader:
@@ -41,7 +40,6 @@ ColorTextureProgram::ColorTextureProgram() {
 	TexCoord_vec2 = glGetAttribLocation(program, "TexCoord");
 
 	//look up the locations of uniforms:
-	OBJECT_TO_CLIP_mat4 = glGetUniformLocation(program, "OBJECT_TO_CLIP");
 	GLuint TEX_sampler2D = glGetUniformLocation(program, "TEX");
 
 	//set TEX to always refer to texture binding zero:
@@ -52,8 +50,26 @@ ColorTextureProgram::ColorTextureProgram() {
 	glUseProgram(0); //unbind program -- glUniform* calls refer to ??? now
 }
 
-ColorTextureProgram::~ColorTextureProgram() {
+Texture2DProgram::~Texture2DProgram() {
 	glDeleteProgram(program);
 	program = 0;
 }
 
+GLuint Texture2DProgram::GetVao(GLuint vertex_buffer) const
+{
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+
+    glEnableVertexAttribArray(Position_vec4);
+    glVertexAttribPointer(Position_vec4, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, Position));
+
+	glEnableVertexAttribArray(Color_vec4);
+    glVertexAttribPointer(Color_vec4, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const void*)offsetof(Vertex, Color));
+
+    glEnableVertexAttribArray(TexCoord_vec2);
+    glVertexAttribPointer(TexCoord_vec2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, TexCoord));
+
+    return vao;
+}
