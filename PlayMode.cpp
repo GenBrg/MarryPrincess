@@ -6,8 +6,8 @@ constexpr const char * const kFontPath { "dist\\Inkfree.ttf" };
 
 PlayMode::PlayMode()
 {
-	overlay.AddText("test", "Hello World!", {0.0f, 0.0f}, kFontPath, 2000);
-	overlay.AddText("test2", "AAABBBCCC", {-1.0f, -1.0f}, kFontPath, 2000);
+	overlay.AddText("test", "Hello World!", {0.0f, 0.0f}, kFontPath, 2000, glm::u8vec4(0x12, 0x34, 0x56, 0x78));
+	overlay.AddText("test2", "AAABBBCCC", {-1.0f, -1.0f}, kFontPath, 2000, glm::u8vec4(0x00, 0xff, 0x00, 0xff));
 }
 
 PlayMode::~PlayMode() 
