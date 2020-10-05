@@ -20,6 +20,7 @@ private:
 
 public:
     Dialog(const char* font_path, const glm::u8vec4& background_color, const glm::vec4& bounding_box, FT_F26Dot6 font_size, const glm::u8vec4& font_color);
+    Dialog(const Dialog&) = delete;
     virtual ~Dialog();
     void AddText(const char* text, const glm::vec2& anchor);
     void SetVisibility(bool visible) { visible_ = visible; }
@@ -60,4 +61,4 @@ public:
     void Draw(const glm::uvec2& drawable_size) const;
 };
 
-extern Load<DialogSystem> dialog_system;
+extern DialogSystem* dialog_system;

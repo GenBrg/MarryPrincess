@@ -12,9 +12,7 @@ static const std::unordered_map<std::string, glm::u8vec4> kFontColors {
     {"black", {0x00, 0x00, 0x00, 0xff}}
 };
 
-Load<DialogSystem> dialog_system(LoadTagDefault, []() -> const DialogSystem* {
-    return new DialogSystem(data_path("MarryPrincess.dialogs"));
-});
+DialogSystem* dialog_system { nullptr };
 
 Dialog::Dialog(const char* font_path, const glm::u8vec4& background_color, const glm::vec4& bounding_box, FT_F26Dot6 font_size, const glm::u8vec4& font_color) :
 background_color_(background_color),

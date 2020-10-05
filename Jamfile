@@ -125,6 +125,7 @@ COMMON_NAMES =
 	Texture2DProgram
 	Timer
 	Dialog
+	MazeMode
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory

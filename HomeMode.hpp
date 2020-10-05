@@ -1,10 +1,18 @@
 #include "Mode.hpp"
-
-#include "Overlay.hpp"
+#include "Dialog.hpp"
+#include "Player.hpp"
 
 #include <glm/glm.hpp>
 
 struct HomeMode : Mode {
+	enum class State : uint8_t {
+		HOME = 0,
+		PRINCESS,
+		BUY,
+		SELL
+	} state_ { State::HOME };
+	MenuDialog* current_menu_ { nullptr };
+
 	HomeMode();
 	virtual ~HomeMode();
 
@@ -13,5 +21,5 @@ struct HomeMode : Mode {
 	virtual void update(float elapsed) override;
 	virtual void draw(glm::uvec2 const &drawable_size) override;
 
-	Overlay overlay;
+	void Initialize();
 };

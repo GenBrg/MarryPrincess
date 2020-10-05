@@ -24,7 +24,16 @@ struct Texture2DProgram {
 	};
 	static_assert(sizeof(Vertex) == 2 * 4 + 4 * 1 + 2 * 4, "Vertex is packed.");
 
+	struct BoxDrawable {
+		GLuint vertex_array_ { 0 };
+		GLuint vertex_buffer_ { 0 };
+
+		void Clear();
+	};
+
     GLuint GetVao(GLuint vertex_buffer) const;
+	void SetBox(BoxDrawable& drawable, const glm::vec4& box, const glm::u8vec4& color) const;
+	void DrawBox(const BoxDrawable& drawable) const;
 };
 
 extern Load<Texture2DProgram> texture2d_program;

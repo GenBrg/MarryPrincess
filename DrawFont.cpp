@@ -1,4 +1,6 @@
 #include "DrawFont.hpp"
+#include "Dialog.hpp"
+#include "data_path.hpp"
 
 #include "Load.hpp"
 
@@ -24,6 +26,8 @@ Load<void> load_ft_library(LoadTagEarly, []() {
 	{
 		throw std::runtime_error("FT_Init_FreeType error!");
 	}
+
+	dialog_system = new DialogSystem(data_path("MarryPrincess.dialogs"));
 });
 
 void DrawFont::Draw(const glm::uvec2 &drawable_size)
@@ -148,7 +152,6 @@ void DrawFont::SetText(const char *text, FT_F26Dot6 size)
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGenTextures(1, &texture_id);
-		std::cout << texture_id << std::endl;
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
