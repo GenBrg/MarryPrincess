@@ -31,9 +31,19 @@ struct Texture2DProgram {
 		void Clear();
 	};
 
+	struct CircleDrawable {
+		GLuint vertex_array_ { 0 };
+		GLuint vertex_buffer_ { 0 };
+		int vertex_count_ { 0 };
+
+		void Clear();
+	};
+
     GLuint GetVao(GLuint vertex_buffer) const;
 	void SetBox(BoxDrawable& drawable, const glm::vec4& box, const glm::u8vec4& color) const;
+	void SetCircle(CircleDrawable& drawable, const glm::vec2& origin, float radius, int vertex_count, const glm::u8vec4& color) const;
 	void DrawBox(const BoxDrawable& drawable) const;
+	void DrawCircle(const CircleDrawable& drawable) const;
 };
 
 extern Load<Texture2DProgram> texture2d_program;

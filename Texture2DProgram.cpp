@@ -113,6 +113,33 @@ void Texture2DProgram::SetBox(BoxDrawable& drawable, const glm::vec4& box, const
 	glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vertex), static_cast<const void *>(vertexes), GL_STATIC_DRAW);
 }
 
+void Texture2DProgram::SetCircle(CircleDrawable& drawable, const glm::vec2& origin, float radius, int vertex_count, const glm::u8vec4& color) const
+{
+	drawable.Clear();
+	
+	glGenBuffers(1, &drawable.vertex_buffer_);
+	drawable.vertex_array_ = texture2d_program->GetVao(drawable.vertex_buffer_);
+	drawable.vertex_count_ = vertex_count;
+	glBindBuffer(GL_ARRAY_BUFFER, drawable.vertex_buffer_);
+
+	std::vector<Vertex> vertexes(vertex_count);
+
+	
+	
+	float angle_inc = 360.0f / vertex_count;
+	float angle = 0.0f;
+
+	for (int i = 0; i < vertex_count; ++i) {
+		Vertex& vertex = vertexes[i];
+		vertex.Color = color;
+		vertex.Position[0] = origin[0] + radius * glm::cos(glm::radians(angle));
+		vertex.Position[1] = origin[1] + radius * glm::sin(glm::radians(angle));
+		angle += angle_inc;
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, vertex_count * sizeof(Vertex), static_cast<const void *>(vertexes.data()), GL_STATIC_DRAW);
+}
+
 void Texture2DProgram::DrawBox(const BoxDrawable& drawable) const
 {
 	glUseProgram(program);
@@ -123,7 +150,27 @@ void Texture2DProgram::DrawBox(const BoxDrawable& drawable) const
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<const void *>(0));
 }
 
+void Texture2DProgram::DrawCircle(const CircleDrawable& drawable) const
+{
+	glUseProgram(program);
+	glBindVertexArray(drawable.vertex_array_);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, default_texture);
+	glDrawArrays(GL_LINE_LOOP, 0, drawable.vertex_count_);
+}
+
 void Texture2DProgram::BoxDrawable::Clear()
+{
+	if (vertex_buffer_ > 0) {
+		glDeleteBuffers(1, &vertex_buffer_);
+	}
+
+	if (vertex_array_ > 0) {
+		glDeleteVertexArrays(1, &vertex_array_);
+	}
+}
+
+void Texture2DProgram::CircleDrawable::Clear()
 {
 	if (vertex_buffer_ > 0) {
 		glDeleteBuffers(1, &vertex_buffer_);

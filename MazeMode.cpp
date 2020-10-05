@@ -7,6 +7,10 @@
 #include <stack>
 #include <random>
 
+static constexpr float kPlayerDrawableRadius { 0.02f };
+static constexpr int kCircleVertexCount { 20 };
+static constexpr glm::u8vec4 kPlayerColor { 0xff, 0x00, 0x00, 0xff };
+
 MazeMode::MazeMode()
 {
 	Initialize();
@@ -14,6 +18,8 @@ MazeMode::MazeMode()
 
 MazeMode::~MazeMode()
 {
+	player_pos_drawable_.Clear();
+	ClearRooms();
 }
 
 bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
@@ -43,6 +49,11 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void MazeMode::update(float elapsed)
 {
+	auto get_screen_pos = [&](const glm::uvec2& pos) {
+		return glm::vec2(kMazeStartPos[0] + (pos[1] + 0.5f) * Room::kRoomSize, kMazeStartPos[1] - (pos[0] + 0.5f) * Room::kRoomSize);
+	};
+
+	texture2d_program->SetCircle(player_pos_drawable_, get_screen_pos(position_), kPlayerDrawableRadius, kCircleVertexCount, kPlayerColor);
 }
 
 void MazeMode::draw(glm::uvec2 const &drawable_size)
@@ -68,6 +79,7 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 		}
 
 		// Draw player position
+		texture2d_program->DrawCircle(player_pos_drawable_);
 
 		// Draw dialogs
 		dialog_system->Draw(drawable_size);
@@ -130,22 +142,22 @@ void MazeMode::GenerateMaze()
 		}
 	}
 
-	for (int i = 0; i < kMazeHeight; ++i) {
+	// for (int i = 0; i < kMazeHeight; ++i) {
 		
-		for (int j = 0; j < kMazeWidth; ++j) {
-			int connect = Room::Flag::CONNECT_UP;
-			for (int k = 0; k < 4; k++) {
-				if (map_[i][j].flag_ & connect) {
-					std::cout << "1";
-				} else {
-					std::cout << "0";
-				}
-				connect <<= 1;
-			}
-			std::cout << " ";
-		}
-		std::cout << std::endl;
-	}
+	// 	for (int j = 0; j < kMazeWidth; ++j) {
+	// 		int connect = Room::Flag::CONNECT_UP;
+	// 		for (int k = 0; k < 4; k++) {
+	// 			if (map_[i][j].flag_ & connect) {
+	// 				std::cout << "1";
+	// 			} else {
+	// 				std::cout << "0";
+	// 			}
+	// 			connect <<= 1;
+	// 		}
+	// 		std::cout << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 
 	// Select treasure room, monster room, etc...
 
