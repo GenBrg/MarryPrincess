@@ -5,7 +5,7 @@
 
 if $(OS) = NT { #Windows
 	NEST_LIBS = ..\\nest-libs\\windows ;
-	C++FLAGS = /nologo /Z7 /c /EHsc /W3 /WX /MD
+	C++FLAGS = /nologo /Z7 /c /EHsc /W3 /WX /MD /std:c++17
 		/I"$(NEST_LIBS)/SDL2/include"
 		/I"$(NEST_LIBS)/glm/include"
 		/I"$(NEST_LIBS)/libpng/include"
@@ -122,9 +122,9 @@ COMMON_NAMES =
 	GL
 	Load
 	DrawFont
-	Overlay
 	Texture2DProgram
 	Timer
+	Dialog
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory

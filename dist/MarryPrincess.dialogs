@@ -1,0 +1,20 @@
+dialog Main
+dist\Inkfree.ttf
+black
+-0.2 0.2 0.2 -0.2
+2000
+white
+3
+-0.15 0.15 Marry the princess!!
+-0.15 0.0 abcdefgasfdfh!!
+-0.4 0.0 sadafaf!!
+menu Main2
+dist\Inkfree.ttf
+black
+-0.2 0.2 0.2 -0.2
+2000
+white
+3 0 black
+-0.15 -0.15 abcdefgh!!
+-0.15 -0.3 vdsvwsef!!
+-0.15 -0.45 AA ss!!

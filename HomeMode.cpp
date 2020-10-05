@@ -1,31 +1,31 @@
 #include "PlayMode.hpp"
-#include "Dialog.hpp"
 
 #include <iostream>
 
 constexpr const char * const kFontPath { "dist\\Inkfree.ttf" };
 
-PlayMode::PlayMode()
+HomeMode::HomeMode()
 {
-
+	overlay.AddText("test", "Hello World!", {0.0f, 0.0f}, kFontPath, 2000, glm::u8vec4(0x12, 0x34, 0x56, 0x78));
+	overlay.AddText("test2", "AAABBBCCC", {-1.0f, -1.0f}, kFontPath, 2000, glm::u8vec4(0x00, 0xff, 0x00, 0xff));
 }
 
-PlayMode::~PlayMode() 
+HomeMode::~HomeMode() 
 {
 	
 }
 
-bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) 
+bool HomeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size) 
 {
 	return true;
 }
 
-void PlayMode::update(float elapsed) 
+void HomeMode::update(float elapsed) 
 {
 	
 }
 
-void PlayMode::draw(glm::uvec2 const &drawable_size) 
+void HomeMode::draw(glm::uvec2 const &drawable_size) 
 {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -39,6 +39,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size)
 
 	{ //use DrawLines to overlay some text:
 		glDisable(GL_DEPTH_TEST);
-		dialog_system->Draw(drawable_size);
+
+		overlay.Draw(drawable_size);
 	}
 }

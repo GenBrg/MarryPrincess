@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Scene.hpp"
 #include "Texture2DProgram.hpp"
 
 #include <ft2build.h>
@@ -13,8 +12,7 @@
 
 class DrawFont {
 private:
-    FT_Library& library_;
-    FT_Face face_;
+    FT_Face& face_;
 
     std::vector<GLuint> texture_ids_;
 
@@ -26,6 +24,7 @@ private:
     glm::vec2 anchor_;
     std::string text_;
     glm::u8vec4 color_;
+    bool visible_ { true };
 
     float GetOpenGLPos(float pos, int drawable_size)
     {
@@ -38,11 +37,15 @@ private:
     }
 public:
     static GLuint index_buffer_;
+    static FT_Library library_;
 
-    DrawFont(FT_Library& library, const char* font_path);
+    DrawFont(FT_Face& face) : face_(face) {};
     ~DrawFont();
 
     void Draw(const glm::uvec2& drawable_size);
-    void SetText(const char* text, FT_F26Dot6 size, const glm::u8vec4& color, const glm::vec2& anchor);
+    void SetText(const char* text, FT_F26Dot6 size);
+    void SetColor(const glm::u8vec4& color);
+    void SetPos(const glm::vec2& anchor);
     void ClearText();
+    void SetVisibility(bool visible);
 };

@@ -7,7 +7,8 @@
 
 unsigned int index_buffer_content[] {0, 1, 2, 1, 2, 3};
 
-GLuint DrawFont::index_buffer_ = 0;
+GLuint DrawFont::index_buffer_ { 0 };
+FT_Library DrawFont::library_;
 
 Load<void> load_index_buffer(LoadTagEarly, [](){
     glGenBuffers(1, &DrawFont::index_buffer_);
@@ -15,26 +16,20 @@ Load<void> load_index_buffer(LoadTagEarly, [](){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), index_buffer_content, GL_STATIC_DRAW);
 });
 
-DrawFont::DrawFont(FT_Library& library, const char* font_path) :
-library_(library)
-{
+Load<void> load_ft_library(LoadTagEarly, []() {
     FT_Error error;
+	error = FT_Init_FreeType(&DrawFont::library_);
 
-    error = FT_New_Face(library, font_path, 0, &face_);
-
-	if (error == FT_Err_Unknown_File_Format) {
-        throw std::runtime_error("The font file could be opened and read, but it appears that its font format is unsupported!");
-	} else if (error) {
-        throw std::runtime_error("The font file could not be opened or read, or that it is broken!");
+	if (error) {
+        throw std::runtime_error("FT_Init_FreeType error!");
 	}
-
-	if (!face_) {
-        throw std::runtime_error("Wrong font!");
-	}
-}
+});
 
 void DrawFont::Draw(const glm::uvec2& drawable_size)
 {
+    if (!visible_)
+        return;
+
 	glUseProgram(texture2d_program->program);
 
     float cursor_x = GetPixelPos(anchor_.x, drawable_size.x), cursor_y = GetPixelPos(anchor_.y, drawable_size.y);
@@ -81,6 +76,9 @@ void DrawFont::Draw(const glm::uvec2& drawable_size)
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<const void*>(0));
 
+        glDeleteBuffers(1, &vertex_buffer);
+        glDeleteVertexArrays(1, &vertex_array);
+
 		cursor_x += x_advance;
 		cursor_y += y_advance;
 	}
@@ -111,11 +109,10 @@ DrawFont::~DrawFont()
 }
 
 // pos: OpenGL position (-1, 1)
-void DrawFont::SetText(const char* text, FT_F26Dot6 size, const glm::u8vec4& color, const glm::vec2& anchor)
+void DrawFont::SetText(const char* text, FT_F26Dot6 size)
 {
     ClearText();
-    anchor_ = anchor;
-    color_ = color;
+    
     text_ = text;
 
     FT_Set_Char_Size(face_, 0, size, 0, 0);
@@ -146,10 +143,11 @@ void DrawFont::SetText(const char* text, FT_F26Dot6 size, const glm::u8vec4& col
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glGenTextures(1, &texture_id);
+        std::cout << texture_id << std::endl;
         glBindTexture(GL_TEXTURE_2D, texture_id);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -161,5 +159,25 @@ void DrawFont::SetText(const char* text, FT_F26Dot6 size, const glm::u8vec4& col
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
         
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        // while (GLenum error = glGetError())
+        // {
+        //     std::cout << "[OpenGL Error] (" << error << "):" << std::endl;
+        // }
 	}
+}
+
+void DrawFont::SetPos(const glm::vec2& anchor)
+{
+    anchor_ = anchor;
+}
+
+void DrawFont::SetVisibility(bool visible)
+{
+    visible_ = visible;
+}
+
+void DrawFont::SetColor(const glm::u8vec4& color)
+{
+    color_ = color;
 }
