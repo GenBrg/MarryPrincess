@@ -8,13 +8,39 @@ white
 -0.15 0.15 Marry the princess!!
 -0.15 0.0 abcdefgasfdfh!!
 -0.4 0.0 sadafaf!!
-menu Main2
+menu maze_normal
 dist\Inkfree.ttf
-black
--0.2 0.2 0.2 -0.2
+yellow
+-0.5 -0.5 -0.5 -0.9
 2000
 white
-3 0 black
--0.15 -0.15 abcdefgh!!
--0.15 -0.3 vdsvwsef!!
--0.15 -0.45 AA ss!!
+4 0 red
+-0.3 -0.65 Up
+0.0 -0.65 Right
+-0.3 -0.75 Down
+0.0 -0.75 Left
+menu maze_monster
+dist\Inkfree.ttf
+yellow
+-0.5 -0.5 -0.5 -0.9
+2000
+white
+2 0 red
+-0.3 -0.65 Attack
+-0.3 -0.75 Escape
+dialog maze_treasure
+dist\Inkfree.ttf
+transparent
+-0.2 0.2 0.2 -0.2
+2000
+green
+1
+-0.95 -0.95 Press Enter to get the treasure!
+dialog maze_exit
+dist\Inkfree.ttf
+transparent
+-0.2 0.2 0.2 -0.2
+2000
+green
+1
+-0.95 -0.95 Press Enter to get the exit the maze!

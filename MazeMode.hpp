@@ -9,24 +9,24 @@
 
 enum class Direction : uint8_t
 {
-	UP,
+	UP = 0,
 	RIGHT,
 	DOWN,
 	LEFT
 };
 
-inline constexpr glm::uvec2 direction[] {
-	{ -1, 0 },
-	{ 0, 1 },
-	{ 1, 0 },
-	{ 0, -1 }
-};
+inline constexpr glm::uvec2 kDirection[]{
+	{-1, 0},
+	{0, 1},
+	{1, 0},
+	{0, -1}};
 
 struct MazeMode : Mode
 {
-	inline static constexpr int kMazeHeight { 10 };
-	inline static constexpr int kMazeWidth { 10 };
-	inline static constexpr glm::vec2 kMazeStartPos { -0.5f, 0.5f };
+	inline static constexpr int kMazeHeight{10};
+	inline static constexpr int kMazeWidth{10};
+	inline static constexpr int kMonsterNum{3};
+	inline static constexpr glm::vec2 kMazeStartPos{-0.5f, 0.5f};
 
 	// enum class State : uint8_t {
 	// 	BATTLE = 0,
@@ -46,28 +46,25 @@ struct MazeMode : Mode
 
 	struct Room
 	{
-		inline static constexpr float kRoomSize { 0.1f };
-		inline static constexpr float kWallSize { 0.02f };
-		inline static const glm::u8vec4 kRoomColors[] {
-			{ 0xff, 0xff, 0xff, 0xff },
-			{ 0xff, 0xff, 0xff, 0xff },
-			{ 0xff, 0xff, 0xff, 0xff },
-			{ 0xff, 0xff, 0xff, 0xff },
-			{ 0xff, 0xff, 0xff, 0xff }
-		};
-		inline static const glm::u8vec4 kWallColor { 0x00, 0x00, 0x00, 0xff };
-
+		inline static constexpr float kRoomSize{0.1f};
+		inline static constexpr float kWallSize{0.02f};
+		inline static const glm::u8vec4 kRoomColors[]{
+			{0x66, 0xff, 0x33, 0xff},
+			{0xff, 0xff, 0xff, 0xff},
+			{0xff, 0x33, 0x00, 0xff},
+			{0xff, 0xff, 0x99, 0xff}};
+		inline static const glm::u8vec4 kWallColor{0x00, 0x00, 0x00, 0xff};
 
 		enum class Type : uint8_t
 		{
-			ENTRANCE,
+			EXIT,
 			NORMAL,
 			MONSTER,
-			TREASURE,
-			END
+			TREASURE
 		} type_;
 
-		enum Flag : int {
+		enum Flag : int
+		{
 			VISITED = 0x01,
 			CONNECT_UP = 0x02,
 			CONNECT_RIGHT = 0x04,
@@ -77,16 +74,15 @@ struct MazeMode : Mode
 
 		int flag_;
 
-		inline static constexpr Flag kDirectionToFlag[] {
-			CONNECT_UP, CONNECT_RIGHT, CONNECT_DOWN, CONNECT_LEFT
-		};
+		inline static constexpr Flag kDirectionToFlag[]{
+			CONNECT_UP, CONNECT_RIGHT, CONNECT_DOWN, CONNECT_LEFT};
 
-		MenuDialog* menu_;
+		MenuDialog *menu_;
 		Texture2DProgram::BoxDrawable room_drawable_;
 		Texture2DProgram::BoxDrawable wall_drawables_[2];
 
 		Room() { Clear(); }
-		Room(const Room&) = delete;
+		Room(const Room &) = delete;
 
 		void Draw();
 		void Clear();
@@ -107,4 +103,10 @@ struct MazeMode : Mode
 	void ClearRooms();
 	void GenerateMaze();
 	void Initialize();
+
+	void EnterRoom(int direction);
+	void PickupTreasure();
+	void Exit();
+	void FightMonster(int choice);
+	void UpdateRoomColor(const glm::uvec2& pos);
 };

@@ -2,17 +2,17 @@
 
 #include "DrawFont.hpp"
 #include "Load.hpp"
+#include "Texture2DProgram.hpp"
 
 #include <vector>
 #include <unordered_map>
 #include <string>
 
 class Dialog {
-private:
+protected:
     std::vector<DrawFont*> texts_;
-    bool visible_ { true };
-    glm::u8vec4 background_color_;
-    glm::vec4 bounding_box_;
+    bool visible_ { false };
+    Texture2DProgram::BoxDrawable bounding_box_drawable_;
     FT_F26Dot6 font_size_;
     glm::u8vec4 font_color_;
 
@@ -24,7 +24,7 @@ public:
     virtual ~Dialog();
     void AddText(const char* text, const glm::vec2& anchor);
     void SetVisibility(bool visible) { visible_ = visible; }
-    void Draw(const glm::uvec2& drawable_size);
+    virtual void Draw(const glm::uvec2& drawable_size);
 };
 
 class MenuDialog : public Dialog {
@@ -40,6 +40,7 @@ public:
     void NextChoice();
     void PreviousChoice();
     int GetCurrentChoice() const { return current_choice_; }
+    virtual void Draw(const glm::uvec2& drawable_size) override;
 };
 
 class DialogSystem {

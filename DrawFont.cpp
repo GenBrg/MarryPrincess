@@ -26,8 +26,6 @@ Load<void> load_ft_library(LoadTagEarly, []() {
 	{
 		throw std::runtime_error("FT_Init_FreeType error!");
 	}
-
-	dialog_system = new DialogSystem(data_path("MarryPrincess.dialogs"));
 });
 
 void DrawFont::Draw(const glm::uvec2 &drawable_size)

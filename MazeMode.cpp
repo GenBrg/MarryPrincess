@@ -6,10 +6,12 @@
 #include <iostream>
 #include <stack>
 #include <random>
+#include <set>
 
-static constexpr float kPlayerDrawableRadius { 0.02f };
-static constexpr int kCircleVertexCount { 20 };
-static constexpr glm::u8vec4 kPlayerColor { 0xff, 0x00, 0x00, 0xff };
+static constexpr float kPlayerDrawableRadius{0.02f};
+static constexpr int kCircleVertexCount{20};
+static constexpr glm::u8vec4 kPlayerColor{0xbb, 0xb0, 0xe8, 0xff};
+static constexpr glm::u8vec4 kBackgroundColor{0x0f, 0x02, 0xff, 0xff};
 
 MazeMode::MazeMode()
 {
@@ -26,20 +28,71 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 {
 	if (evt.type == SDL_KEYDOWN)
 	{
+		Room &current_room = map_[position_.x][position_.y];
 		if (evt.key.keysym.sym == SDLK_w)
 		{
-			
+			switch (current_room.type_)
+			{
+			case Room::Type::EXIT:
+			case Room::Type::NORMAL:
+			case Room::Type::TREASURE:
+				EnterRoom(0);
+				break;
+			case Room::Type::MONSTER:
+				dynamic_cast<MenuDialog *>(dialog_system->GetDialog("maze_monster"))->PreviousChoice();
+				break;
+			default:;
+			}
 			return true;
+		}
+		else if (evt.key.keysym.sym == SDLK_d)
+		{
+			if (current_room.type_ != Room::Type::MONSTER)
+			{
+				EnterRoom(1);
+			}
+		}
+		else if (evt.key.keysym.sym == SDLK_a)
+		{
+			if (current_room.type_ != Room::Type::MONSTER)
+			{
+				EnterRoom(3);
+			}
 		}
 		else if (evt.key.keysym.sym == SDLK_s)
 		{
-			
+			switch (current_room.type_)
+			{
+			case Room::Type::EXIT:
+			case Room::Type::NORMAL:
+			case Room::Type::TREASURE:
+				EnterRoom(2);
+				break;
+			case Room::Type::MONSTER:
+				dynamic_cast<MenuDialog *>(dialog_system->GetDialog("maze_monster"))->NextChoice();
+				break;
+			default:;
+			}
 			return true;
 		}
 		else if (evt.key.keysym.sym == SDLK_RETURN)
 		{
-			
-			
+			switch (current_room.type_)
+			{
+			case Room::Type::EXIT:
+
+				break;
+			case Room::Type::MONSTER:
+			{
+				int current_choice = dynamic_cast<MenuDialog *>(dialog_system->GetDialog("maze_monster"))->GetCurrentChoice();
+				FightMonster(current_choice);
+				break;
+			}
+			case Room::Type::TREASURE:
+
+				break;
+			default:;
+			}
 			return true;
 		}
 	}
@@ -49,7 +102,7 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void MazeMode::update(float elapsed)
 {
-	auto get_screen_pos = [&](const glm::uvec2& pos) {
+	auto get_screen_pos = [&](const glm::uvec2 &pos) {
 		return glm::vec2(kMazeStartPos[0] + (pos[1] + 0.5f) * Room::kRoomSize, kMazeStartPos[1] - (pos[0] + 0.5f) * Room::kRoomSize);
 	};
 
@@ -61,7 +114,7 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glClearColor(0.4f, 0.9f, 0.9f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.5f, 1.0f);
 	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -72,8 +125,10 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 		glDisable(GL_DEPTH_TEST);
 
 		// Draw maze
-		for (auto& row : map_) {
-			for (auto& room : row) {
+		for (auto &row : map_)
+		{
+			for (auto &room : row)
+			{
 				room.Draw();
 			}
 		}
@@ -88,16 +143,16 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 
 void MazeMode::Initialize()
 {
-	dialog_system->CloseAllDialogs();
-	dialog_system->ShowDialogs(data_path("Maze.showdialog"));
 	GenerateMaze();
 	position_ = glm::uvec2(0, 0);
 }
 
 void MazeMode::ClearRooms()
 {
-	for (auto& row : map_) {
-		for (auto& room : row) {
+	for (auto &row : map_)
+	{
+		for (auto &room : row)
+		{
 			room.Clear();
 		}
 	}
@@ -113,37 +168,44 @@ void MazeMode::GenerateMaze()
 	std::random_device rd;
 	std::mt19937 mt{rd()};
 
-	while (!fringe.empty()) {
+	while (!fringe.empty())
+	{
 		current_pos = fringe.top();
-		auto& current_room = map_[current_pos.x][current_pos.y];
+		auto &current_room = map_[current_pos.x][current_pos.y];
 		current_room.flag_ |= Room::Flag::VISITED;
 
 		std::vector<int> choices;
-		for (int i = 0; i < 4; ++i) {
-			const glm::uvec2& dir = direction[i];
+		for (int i = 0; i < 4; ++i)
+		{
+			const glm::uvec2 &dir = kDirection[i];
 			glm::uvec2 new_pos = current_pos + dir;
-			if (new_pos.x < kMazeHeight && new_pos.x >= 0 && new_pos.y < kMazeWidth && new_pos.y >= 0) {
-				if (!(map_[new_pos.x][new_pos.y].flag_ & Room::Flag::VISITED)) {
+			if (new_pos.x < kMazeHeight && new_pos.x >= 0 && new_pos.y < kMazeWidth && new_pos.y >= 0)
+			{
+				if (!(map_[new_pos.x][new_pos.y].flag_ & Room::Flag::VISITED))
+				{
 					choices.push_back(i);
 				}
 			}
 		}
 
 		int choice_num = static_cast<int>(choices.size());
-		if (choice_num > 0) {
+		if (choice_num > 0)
+		{
 			int choice = choices[std::uniform_int_distribution<int>(0, choice_num - 1)(mt)];
-			glm::uvec2 new_pos = current_pos + direction[choice];
-			auto& new_room = map_[new_pos.x][new_pos.y];
+			glm::uvec2 new_pos = current_pos + kDirection[choice];
+			auto &new_room = map_[new_pos.x][new_pos.y];
 			current_room.flag_ |= Room::kDirectionToFlag[choice];
 			new_room.flag_ |= Room::kDirectionToFlag[(choice + 2) % 4];
 			fringe.push(new_pos);
-		} else {
+		}
+		else
+		{
 			fringe.pop();
 		}
 	}
 
 	// for (int i = 0; i < kMazeHeight; ++i) {
-		
+
 	// 	for (int j = 0; j < kMazeWidth; ++j) {
 	// 		int connect = Room::Flag::CONNECT_UP;
 	// 		for (int k = 0; k < 4; k++) {
@@ -160,19 +222,40 @@ void MazeMode::GenerateMaze()
 	// }
 
 	// Select treasure room, monster room, etc...
+	std::uniform_int_distribution<int> special_room_dist(1, kMazeHeight * kMazeWidth - 1);
+	std::set<int> room_set;
 
-	for (int i = 0; i < kMazeHeight; ++i) {
-		for (int j = 0; j < kMazeWidth; ++j) {
-			Room& room = map_[i][j];
-			texture2d_program->SetBox(room.room_drawable_,
-			glm::vec4(
-				kMazeStartPos[0] + j * Room::kRoomSize,
-				kMazeStartPos[1] - i * Room::kRoomSize,
-				kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
-				kMazeStartPos[1] - (i + 1) * Room::kRoomSize
-			), 
+	auto set_room_type = [&](int room_num, Room::Type type) {
+		map_[room_num / kMazeWidth][room_num % kMazeWidth].type_ = type;
+	};
 
-			Room::kRoomColors[static_cast<int>(room.type_)]);
+	auto generate_room = [&](Room::Type type) {
+		while (true)
+		{
+			int room_num = special_room_dist(mt);
+			if (room_set.count(room_num) == 0)
+			{
+				room_set.insert(room_num);
+				set_room_type(room_num, type);
+				break;
+			}
+		}
+	};
+
+	for (int i = 0; i < kMonsterNum; ++i)
+	{
+		generate_room(Room::Type::MONSTER);
+	}
+
+	generate_room(Room::Type::EXIT);
+	generate_room(Room::Type::TREASURE);
+
+	for (int i = 0; i < kMazeHeight; ++i)
+	{
+		for (int j = 0; j < kMazeWidth; ++j)
+		{
+			Room &room = map_[i][j];
+			UpdateRoomColor(glm::uvec2(i, j));
 
 			// if (!(room.flag_ & Room::Flag::CONNECT_UP)) {
 			// 	texture2d_program->SetBox(room.wall_drawables_[0],
@@ -181,30 +264,30 @@ void MazeMode::GenerateMaze()
 			// 		kMazeStartPos[1] - i * Room::kRoomSize,
 			// 		kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
 			// 		kMazeStartPos[1] - (i * Room::kRoomSize + Room::kWallSize)
-			// 	), 
+			// 	),
 			// 	Room::kWallColor);
 			// }
 
-			if (!(room.flag_ & Room::Flag::CONNECT_RIGHT)) {
+			if (!(room.flag_ & Room::Flag::CONNECT_RIGHT))
+			{
 				texture2d_program->SetBox(room.wall_drawables_[0],
-				glm::vec4(
-					kMazeStartPos[0] + (j + 1) * Room::kRoomSize - Room::kWallSize,
-					kMazeStartPos[1] - i * Room::kRoomSize,
-					kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
-					kMazeStartPos[1] - (i + 1) * Room::kRoomSize
-				), 
-				Room::kWallColor);
+										  glm::vec4(
+											  kMazeStartPos[0] + (j + 1) * Room::kRoomSize - Room::kWallSize,
+											  kMazeStartPos[1] - i * Room::kRoomSize,
+											  kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
+											  kMazeStartPos[1] - (i + 1) * Room::kRoomSize),
+										  Room::kWallColor);
 			}
 
-			if (!(room.flag_ & Room::Flag::CONNECT_DOWN)) {
+			if (!(room.flag_ & Room::Flag::CONNECT_DOWN))
+			{
 				texture2d_program->SetBox(room.wall_drawables_[1],
-				glm::vec4(
-					kMazeStartPos[0] + j * Room::kRoomSize,
-					kMazeStartPos[1] - ((i + 1) * Room::kRoomSize - Room::kWallSize),
-					kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
-					kMazeStartPos[1] - (i + 1) * Room::kRoomSize
-				), 
-				Room::kWallColor);
+										  glm::vec4(
+											  kMazeStartPos[0] + j * Room::kRoomSize,
+											  kMazeStartPos[1] - ((i + 1) * Room::kRoomSize - Room::kWallSize),
+											  kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
+											  kMazeStartPos[1] - (i + 1) * Room::kRoomSize),
+										  Room::kWallColor);
 			}
 
 			// if (!(room.flag_ & Room::Flag::CONNECT_LEFT)) {
@@ -214,7 +297,7 @@ void MazeMode::GenerateMaze()
 			// 		kMazeStartPos[1] - i * Room::kRoomSize,
 			// 		kMazeStartPos[0] + j * Room::kRoomSize + Room::kWallSize,
 			// 		kMazeStartPos[1] - (i + 1) * Room::kRoomSize
-			// 	), 
+			// 	),
 			// 	Room::kWallColor);
 			// }
 		}
@@ -224,7 +307,8 @@ void MazeMode::GenerateMaze()
 void MazeMode::Room::Draw()
 {
 	texture2d_program->DrawBox(room_drawable_);
-	for (auto& wall_drawable : wall_drawables_) {
+	for (auto &wall_drawable : wall_drawables_)
+	{
 		texture2d_program->DrawBox(wall_drawable);
 	}
 }
@@ -234,7 +318,96 @@ void MazeMode::Room::Clear()
 	type_ = Type::NORMAL;
 	flag_ = 0;
 	room_drawable_.Clear();
-	for (auto& wall_drawable : wall_drawables_) {
+	for (auto &wall_drawable : wall_drawables_)
+	{
 		wall_drawable.Clear();
 	}
+}
+
+void MazeMode::EnterRoom(int direction)
+{
+	glm::uvec2 new_pos = position_ + kDirection[direction];
+	if (new_pos.x < kMazeHeight && new_pos.x >= 0 && new_pos.y < kMazeWidth && new_pos.y >= 0)
+	{
+		if (map_[position_.x][position_.y].flag_ & (Room::Flag::CONNECT_UP << direction))
+		{
+			position_ = new_pos;
+			// Exit room clean up
+			dialog_system->CloseAllDialogs();
+			// Enter room
+			switch (map_[new_pos.x][new_pos.y].type_)
+			{
+			case Room::Type::EXIT:
+				dialog_system->ShowDialogs(std::vector<std::string>{"maze_exit"});
+				break;
+			case Room::Type::NORMAL:
+				break;
+			case Room::Type::TREASURE:
+				dialog_system->ShowDialogs(std::vector<std::string>{"maze_treasure"});
+				break;
+			case Room::Type::MONSTER:
+				dialog_system->ShowDialogs(std::vector<std::string>{"maze_monster"});
+				break;
+			default:;
+			}
+		}
+	}
+}
+
+void MazeMode::FightMonster(int choice)
+{
+	std::random_device rd;
+	std::mt19937 mt{rd()};
+	auto fight_succeed = [&]() {
+		int i = position_.x;
+		int j = position_.y;
+		Room& current_room = map_[i][j];
+		current_room.type_ = Room::Type::NORMAL;
+		dialog_system->CloseAllDialogs();
+		UpdateRoomColor(position_);
+	};
+
+	enum Choice
+	{
+		ATTACK = 0,
+		ESCAPE
+	};
+
+	switch (choice)
+	{
+	case ATTACK:
+
+		break;
+	case ESCAPE:
+		if (std::uniform_int_distribution<int>(1, 10)(mt) <= 3)
+		{
+			fight_succeed();
+			return;
+		}
+		break;
+	default:
+		throw std::runtime_error("Unknown fight monster option!");
+	}
+
+	// Monster attack you
+
+	// End fight if you die
+
+	// Or succeed
+}
+
+void MazeMode::UpdateRoomColor(const glm::uvec2& pos)
+{
+	int i = pos.x;
+	int j = pos.y;
+	Room& current_room = map_[i][j];
+	texture2d_program->SetBox(current_room.room_drawable_,
+								glm::vec4(
+									kMazeStartPos[0] + j * Room::kRoomSize,
+									kMazeStartPos[1] - i * Room::kRoomSize,
+									kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
+									kMazeStartPos[1] - (i + 1) * Room::kRoomSize),
+
+								Room::kRoomColors[static_cast<int>(current_room.type_)]);
+
 }

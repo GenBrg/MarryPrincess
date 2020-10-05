@@ -9,14 +9,22 @@
 
 static const std::unordered_map<std::string, glm::u8vec4> kFontColors {
     {"white", {0xff, 0xff, 0xff, 0xff}},
-    {"black", {0x00, 0x00, 0x00, 0xff}}
+    {"black", {0x00, 0x00, 0x00, 0xff}},
+    {"red", {0xff, 0x33, 0x00, 0xff}},
+    {"green", {0x66, 0xff, 0x33, 0xff}},
+    {"blue", {0xff, 0x99, 0xff, 0xff}},
+    {"pink", {0xff, 0x99, 0xff, 0xff}},
+    {"yellow", {0xff, 0xff, 0x99, 0xff}},
+    {"transparent", {0x00, 0x00, 0x00, 0x00}}
 };
 
 DialogSystem* dialog_system { nullptr };
 
+Load<void> load_dialog_system(LoadTagDefault, []() {
+	dialog_system = new DialogSystem(data_path("MarryPrincess.dialogs"));
+});
+
 Dialog::Dialog(const char* font_path, const glm::u8vec4& background_color, const glm::vec4& bounding_box, FT_F26Dot6 font_size, const glm::u8vec4& font_color) :
-background_color_(background_color),
-bounding_box_(bounding_box),
 font_size_(font_size),
 font_color_(font_color)
 {
@@ -33,6 +41,8 @@ font_color_(font_color)
 	if (!face_) {
         throw std::runtime_error("Wrong font!");
 	}
+
+    texture2d_program->SetBox(bounding_box_drawable_, bounding_box, background_color);
 }
 
 void Dialog::AddText(const char* text, const glm::vec2& anchor)
@@ -49,7 +59,7 @@ void Dialog::Draw(const glm::uvec2& drawable_size)
     if (!visible_)
         return;
 
-    // TODO: Draw dialog background
+    texture2d_program->DrawBox(bounding_box_drawable_);
 
     for (auto text : texts_) {
         text->Draw(drawable_size);
@@ -69,6 +79,7 @@ current_choice_(current_choice)
 void MenuDialog::NextChoice()
 {
     if (current_choice_ < max_choice_) {
+        texts_[current_choice_]->SetColor(font_color_);
         ++current_choice_;
     }
 }
@@ -76,8 +87,15 @@ void MenuDialog::NextChoice()
 void MenuDialog::PreviousChoice()
 {
     if (current_choice_ > 0) {
+        texts_[current_choice_]->SetColor(font_color_);
         --current_choice_;
     }
+}
+
+void MenuDialog::Draw(const glm::uvec2& drawable_size)
+{
+    texts_[current_choice_]->SetColor(current_choice_color_);
+    Dialog::Draw(drawable_size);
 }
 
 DialogSystem::DialogSystem(const std::string& file_path)
@@ -115,7 +133,7 @@ DialogSystem::DialogSystem(const std::string& file_path)
                 int current_choice;
                 std::string current_choice_color;
                 f >> current_choice >> current_choice_color;
-
+                
                 dialog = new MenuDialog(font_path.c_str(), kFontColors.at(background_color), bounding_box, font_size, kFontColors.at(font_color),
                  dialog_num - 1, kFontColors.at(current_choice_color), current_choice);
 
@@ -217,4 +235,5 @@ Dialog::~Dialog()
     for (DrawFont* text : texts_) {
         delete text;
     }
+    bounding_box_drawable_.Clear();
 }
