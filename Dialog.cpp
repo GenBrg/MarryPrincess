@@ -39,11 +39,11 @@ font_color_(font_color)
 
 void Dialog::AddText(const char* text, const glm::vec2& anchor)
 {
-    texts_.emplace_back(face_);
-    DrawFont& new_text = texts_.back();
-    new_text.SetColor(font_color_);
-    new_text.SetPos(anchor);
-    new_text.SetText(text, font_size_);
+    DrawFont* new_text = new DrawFont(face_);
+    new_text->SetColor(font_color_);
+    new_text->SetPos(anchor);
+    new_text->SetText(text, font_size_);
+    texts_.emplace_back(new_text);
 }
 
 void Dialog::Draw(const glm::uvec2& drawable_size)
@@ -53,8 +53,8 @@ void Dialog::Draw(const glm::uvec2& drawable_size)
 
     // TODO: Draw dialog background
 
-    for (auto& text : texts_) {
-        text.Draw(drawable_size);
+    for (auto text : texts_) {
+        text->Draw(drawable_size);
     }
 }
 
@@ -210,5 +210,13 @@ void DialogSystem::Draw(const glm::uvec2& drawable_size) const
 {
     for (auto& [label, dialog] : dialogs_) {
         dialog->Draw(drawable_size);
+    }
+}
+
+Dialog::~Dialog()
+{ 
+    FT_Done_Face(face_); 
+    for (DrawFont* text : texts_) {
+        delete text;
     }
 }

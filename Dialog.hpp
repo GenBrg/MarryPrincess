@@ -9,7 +9,7 @@
 
 class Dialog {
 private:
-    std::vector<DrawFont> texts_;
+    std::vector<DrawFont*> texts_;
     bool visible_ { true };
     glm::u8vec4 background_color_;
     glm::vec4 bounding_box_;
@@ -20,7 +20,7 @@ private:
 
 public:
     Dialog(const char* font_path, const glm::u8vec4& background_color, const glm::vec4& bounding_box, FT_F26Dot6 font_size, const glm::u8vec4& font_color);
-    virtual ~Dialog() { FT_Done_Face(face_); }
+    virtual ~Dialog();
     void AddText(const char* text, const glm::vec2& anchor);
     void SetVisibility(bool visible) { visible_ = visible; }
     void Draw(const glm::uvec2& drawable_size);
@@ -54,6 +54,8 @@ public:
 
     void ShowDialogs(const std::vector<std::string>& labels);
     void ShowDialogs(const std::string& file_path);
+
+    Dialog* GetDialog(const std::string& label) { return dialogs_.at(label); }
 
     void Draw(const glm::uvec2& drawable_size) const;
 };

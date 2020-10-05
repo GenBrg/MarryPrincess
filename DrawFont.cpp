@@ -5,79 +5,81 @@
 #include <stdexcept>
 #include <iostream>
 
-unsigned int index_buffer_content[] {0, 1, 2, 1, 2, 3};
+unsigned int index_buffer_content[]{0, 1, 2, 1, 2, 3};
 
-GLuint DrawFont::index_buffer_ { 0 };
+GLuint DrawFont::index_buffer_{0};
 FT_Library DrawFont::library_;
 
-Load<void> load_index_buffer(LoadTagEarly, [](){
-    glGenBuffers(1, &DrawFont::index_buffer_);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, DrawFont::index_buffer_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), index_buffer_content, GL_STATIC_DRAW);
+Load<void> load_index_buffer(LoadTagEarly, []() {
+	glGenBuffers(1, &DrawFont::index_buffer_);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, DrawFont::index_buffer_);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), index_buffer_content, GL_STATIC_DRAW);
 });
 
 Load<void> load_ft_library(LoadTagEarly, []() {
-    FT_Error error;
+	FT_Error error;
 	error = FT_Init_FreeType(&DrawFont::library_);
 
-	if (error) {
-        throw std::runtime_error("FT_Init_FreeType error!");
+	if (error)
+	{
+		throw std::runtime_error("FT_Init_FreeType error!");
 	}
 });
 
-void DrawFont::Draw(const glm::uvec2& drawable_size)
+void DrawFont::Draw(const glm::uvec2 &drawable_size)
 {
-    if (!visible_)
-        return;
+	if (!visible_)
+	{
+		return;
+	}
 
 	glUseProgram(texture2d_program->program);
 
-    float cursor_x = GetPixelPos(anchor_.x, drawable_size.x), cursor_y = GetPixelPos(anchor_.y, drawable_size.y);
-	FT_GlyphSlot slot = face_->glyph; 
+	float cursor_x = GetPixelPos(anchor_.x, drawable_size.x), cursor_y = GetPixelPos(anchor_.y, drawable_size.y);
+	FT_GlyphSlot slot = face_->glyph;
 
-	for (unsigned int i = 0; i < glyph_count_; ++i) {
-		auto glyphid = glyph_info_[i].codepoint;
+	for (unsigned int i = 0; i < glyph_count_; ++i)
+	{
 		auto x_offset = glyph_pos_[i].x_offset / 64.0f;
 		auto y_offset = glyph_pos_[i].y_offset / 64.0f;
 		auto x_advance = glyph_pos_[i].x_advance / 64.0f;
 		auto y_advance = glyph_pos_[i].y_advance / 64.0f;
 
-        FT_Error error = FT_Load_Char(face_, text_[i], FT_LOAD_RENDER);
-        if (error)
-            continue;
-            
-        auto& bitmap = slot->bitmap;
+		FT_Error error = FT_Load_Char(face_, text_[i], FT_LOAD_RENDER);
+		if (error)
+			continue;
 
-        float start_x = GetOpenGLPos(cursor_x + x_offset, drawable_size.x);
-        float start_y = GetOpenGLPos(cursor_y + y_offset, drawable_size.y);
-        float end_x = start_x + bitmap.width * 2.0f / drawable_size.x;
-        float end_y = start_y + bitmap.rows * 2.0f / drawable_size.y;
+		auto &bitmap = slot->bitmap;
 
-        Texture2DProgram::Vertex vertexes[] {
-            {{start_x, start_y}, color_, {0, 1}},
-            {{end_x, start_y}, color_, {1, 1}},
-            {{start_x, end_y}, color_, {0, 0}},
-            {{end_x, end_y}, color_, {1, 0}}
-        };
+		float start_x = GetOpenGLPos(cursor_x + x_offset, drawable_size.x);
+		float start_y = GetOpenGLPos(cursor_y + y_offset, drawable_size.y);
+		float end_x = start_x + bitmap.width * 2.0f / drawable_size.x;
+		float end_y = start_y + bitmap.rows * 2.0f / drawable_size.y;
 
-        GLuint texture_id = texture_ids_[i];
-        GLuint vertex_buffer, vertex_array;
+		Texture2DProgram::Vertex vertexes[]{
+			{{start_x, start_y}, color_, {0, 1}},
+			{{end_x, start_y}, color_, {1, 1}},
+			{{start_x, end_y}, color_, {0, 0}},
+			{{end_x, end_y}, color_, {1, 0}}};
 
-        glGenBuffers(1, &vertex_buffer);
-        vertex_array = texture2d_program->GetVao(vertex_buffer);
+		GLuint texture_id = texture_ids_[i];
+		GLuint vertex_buffer, vertex_array;
 
-        glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-        glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Texture2DProgram::Vertex), static_cast<const void*>(vertexes), GL_STATIC_DRAW);
+		glGenBuffers(1, &vertex_buffer);
+		vertex_array = texture2d_program->GetVao(vertex_buffer);
 
-        glBindVertexArray(vertex_array);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+		glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Texture2DProgram::Vertex), static_cast<const void *>(vertexes), GL_STATIC_DRAW);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<const void*>(0));
+		glBindVertexArray(vertex_array);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        glDeleteBuffers(1, &vertex_buffer);
-        glDeleteVertexArrays(1, &vertex_array);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, static_cast<const void *>(0));
+
+		glDeleteBuffers(1, &vertex_buffer);
+		glDeleteVertexArrays(1, &vertex_array);
 
 		cursor_x += x_advance;
 		cursor_y += y_advance;
@@ -86,39 +88,41 @@ void DrawFont::Draw(const glm::uvec2& drawable_size)
 
 void DrawFont::ClearText()
 {
-    for (GLuint texture_id : texture_ids_)
-    {
-        glDeleteTextures(1, &texture_id);
-    }
-    texture_ids_.clear();
+	for (GLuint texture_id : texture_ids_)
+	{
+		glDeleteTextures(1, &texture_id);
+	}
+	texture_ids_.clear();
 
-    if (buf_) {
-        hb_buffer_destroy(buf_);
-        buf_ = nullptr;
-    }
+	if (buf_)
+	{
+		hb_buffer_destroy(buf_);
+		buf_ = nullptr;
+	}
 
-    if (font_) {
-        hb_font_destroy(font_);
-        font_ = nullptr;
-    }
+	if (font_)
+	{
+		hb_font_destroy(font_);
+		font_ = nullptr;
+	}
 }
 
 DrawFont::~DrawFont()
 {
-    ClearText();
+	ClearText();
 }
 
 // pos: OpenGL position (-1, 1)
-void DrawFont::SetText(const char* text, FT_F26Dot6 size)
+void DrawFont::SetText(const char *text, FT_F26Dot6 size)
 {
-    ClearText();
-    
-    text_ = text;
+	ClearText();
 
-    FT_Set_Char_Size(face_, 0, size, 0, 0);
+	text_ = text;
+
+	FT_Set_Char_Size(face_, 0, size, 0, 0);
 	font_ = hb_ft_font_create(face_, nullptr);
 
-    buf_ = hb_buffer_create();
+	buf_ = hb_buffer_create();
 	hb_buffer_add_utf8(buf_, text, -1, 0, -1);
 	hb_buffer_set_direction(buf_, HB_DIRECTION_LTR);
 	hb_buffer_set_script(buf_, HB_SCRIPT_LATIN);
@@ -127,57 +131,58 @@ void DrawFont::SetText(const char* text, FT_F26Dot6 size)
 	glyph_info_ = hb_buffer_get_glyph_infos(buf_, &glyph_count_);
 	glyph_pos_ = hb_buffer_get_glyph_positions(buf_, &glyph_count_);
 
-	FT_GlyphSlot slot = face_->glyph; 
-	
-	for (unsigned int i = 0; i < glyph_count_; ++i) {
+	FT_GlyphSlot slot = face_->glyph;
 
-        FT_Error error = FT_Load_Char(face_, text[i], FT_LOAD_RENDER);
-        if (error)
-            continue;
+	for (unsigned int i = 0; i < glyph_count_; ++i)
+	{
 
-         auto& bitmap = slot->bitmap;
+		FT_Error error = FT_Load_Char(face_, text[i], FT_LOAD_RENDER);
+		if (error)
+			continue;
 
-        texture_ids_.emplace_back(0);
+		auto &bitmap = slot->bitmap;
 
-        GLuint& texture_id = texture_ids_.back();
+		texture_ids_.emplace_back(0);
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glGenTextures(1, &texture_id);
-        std::cout << texture_id << std::endl;
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+		GLuint &texture_id = texture_ids_.back();
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glGenTextures(1, &texture_id);
+		std::cout << texture_id << std::endl;
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap.width, bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_ONE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ONE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ONE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
-        
-        glBindTexture(GL_TEXTURE_2D, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap.width, bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
 
-        // while (GLenum error = glGetError())
-        // {
-        //     std::cout << "[OpenGL Error] (" << error << "):" << std::endl;
-        // }
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_ONE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ONE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ONE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// while (GLenum error = glGetError())
+		// {
+		//     std::cout << "[OpenGL Error] (" << error << "):" << std::endl;
+		// }
 	}
 }
 
-void DrawFont::SetPos(const glm::vec2& anchor)
+void DrawFont::SetPos(const glm::vec2 &anchor)
 {
-    anchor_ = anchor;
+	anchor_ = anchor;
 }
 
 void DrawFont::SetVisibility(bool visible)
 {
-    visible_ = visible;
+	visible_ = visible;
 }
 
-void DrawFont::SetColor(const glm::u8vec4& color)
+void DrawFont::SetColor(const glm::u8vec4 &color)
 {
-    color_ = color;
+	color_ = color;
 }

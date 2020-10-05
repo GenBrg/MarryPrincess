@@ -39,6 +39,7 @@ public:
     static GLuint index_buffer_;
     static FT_Library library_;
 
+    DrawFont(const DrawFont&) = delete;
     DrawFont(FT_Face& face) : face_(face) {};
     ~DrawFont();
 
