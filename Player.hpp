@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 class Player {
 private:
     float hp_ { 100.0f };

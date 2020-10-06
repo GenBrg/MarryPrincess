@@ -126,6 +126,8 @@ COMMON_NAMES =
 	Timer
 	Dialog
 	MazeMode
+	HomeMode
+	Player
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory

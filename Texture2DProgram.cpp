@@ -163,10 +163,12 @@ void Texture2DProgram::BoxDrawable::Clear()
 {
 	if (vertex_buffer_ > 0) {
 		glDeleteBuffers(1, &vertex_buffer_);
+		vertex_buffer_ = 0;
 	}
 
 	if (vertex_array_ > 0) {
 		glDeleteVertexArrays(1, &vertex_array_);
+		vertex_array_ = 0;
 	}
 }
 
@@ -174,9 +176,11 @@ void Texture2DProgram::CircleDrawable::Clear()
 {
 	if (vertex_buffer_ > 0) {
 		glDeleteBuffers(1, &vertex_buffer_);
+		vertex_buffer_ = 0;
 	}
 
 	if (vertex_array_ > 0) {
 		glDeleteVertexArrays(1, &vertex_array_);
+		vertex_array_ = 0;
 	}
 }

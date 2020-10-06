@@ -1,4 +1,5 @@
 #include "MazeMode.hpp"
+#include "HomeMode.hpp"
 
 #include "Player.hpp"
 #include "data_path.hpp"
@@ -8,6 +9,8 @@
 #include <random>
 #include <set>
 
+std::shared_ptr<MazeMode> mazemode;
+
 static constexpr float kPlayerDrawableRadius{0.02f};
 static constexpr int kCircleVertexCount{20};
 static constexpr glm::u8vec4 kPlayerColor{0xbb, 0xb0, 0xe8, 0xff};
@@ -15,7 +18,6 @@ static constexpr glm::u8vec4 kBackgroundColor{0x0f, 0x02, 0xff, 0xff};
 
 MazeMode::MazeMode()
 {
-	Initialize();
 }
 
 MazeMode::~MazeMode()
@@ -80,7 +82,9 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			switch (current_room.type_)
 			{
 			case Room::Type::EXIT:
-
+				Exit();
+				homemode->Initialize();
+				Mode::set_current(homemode);
 				break;
 			case Room::Type::MONSTER:
 			{
@@ -268,8 +272,10 @@ void MazeMode::GenerateMaze()
 			// 	Room::kWallColor);
 			// }
 
+			// std::cout << i << " " << j << std::endl;
 			if (!(room.flag_ & Room::Flag::CONNECT_RIGHT))
 			{
+				// std::cout << "right!" << std::endl;
 				texture2d_program->SetBox(room.wall_drawables_[0],
 										  glm::vec4(
 											  kMazeStartPos[0] + (j + 1) * Room::kRoomSize - Room::kWallSize,
@@ -281,6 +287,7 @@ void MazeMode::GenerateMaze()
 
 			if (!(room.flag_ & Room::Flag::CONNECT_DOWN))
 			{
+				// std::cout << "down!" << std::endl;
 				texture2d_program->SetBox(room.wall_drawables_[1],
 										  glm::vec4(
 											  kMazeStartPos[0] + j * Room::kRoomSize,
@@ -410,4 +417,9 @@ void MazeMode::UpdateRoomColor(const glm::uvec2& pos)
 
 								Room::kRoomColors[static_cast<int>(current_room.type_)]);
 
+}
+
+void MazeMode::Exit()
+{
+	dialog_system->CloseAllDialogs();
 }

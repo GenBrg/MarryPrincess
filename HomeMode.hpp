@@ -3,14 +3,15 @@
 #include "Player.hpp"
 
 #include <glm/glm.hpp>
+#include <memory>
 
 struct HomeMode : Mode {
-	enum class State : uint8_t {
-		HOME = 0,
-		PRINCESS,
-		BUY,
-		SELL
-	} state_ { State::HOME };
+	// enum class State : uint8_t {
+	// 	HOME = 0,
+	// 	PRINCESS,
+	// 	// BUY,
+	// 	// SELL
+	// } state_ { State::HOME };
 	MenuDialog* current_menu_ { nullptr };
 
 	HomeMode();
@@ -23,3 +24,5 @@ struct HomeMode : Mode {
 
 	void Initialize();
 };
+
+extern std::shared_ptr<HomeMode> homemode;

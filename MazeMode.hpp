@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <memory>
 
 enum class Direction : uint8_t
 {
@@ -77,7 +78,6 @@ struct MazeMode : Mode
 		inline static constexpr Flag kDirectionToFlag[]{
 			CONNECT_UP, CONNECT_RIGHT, CONNECT_DOWN, CONNECT_LEFT};
 
-		MenuDialog *menu_;
 		Texture2DProgram::BoxDrawable room_drawable_;
 		Texture2DProgram::BoxDrawable wall_drawables_[2];
 
@@ -110,3 +110,5 @@ struct MazeMode : Mode
 	void FightMonster(int choice);
 	void UpdateRoomColor(const glm::uvec2& pos);
 };
+
+extern std::shared_ptr<MazeMode> mazemode;
