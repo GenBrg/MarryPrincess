@@ -416,8 +416,8 @@ void MazeMode::FightMonster(int choice)
 		Sound::play(*fight_sfx_sample);
 		int damage = Player::Instance().Attack(monster_->defense_);
 		if (monster_->ApplyDamage(damage)) {
-			int money = monster_->level_ * 50;
-			int exp = monster_->level_ * 20;
+			int money = static_cast<int>((std::uniform_real_distribution<float>(-0.2f, 0.2f)(mt) + monster_->level_) * 50);
+			int exp = static_cast<int>((std::uniform_real_distribution<float>(-0.2f, 0.2f)(mt) + monster_->level_) * 50);
 			Player::Instance().GainMoney(money);
 			Player::Instance().GainExperience(exp);
 			fight_succeed();
@@ -500,7 +500,7 @@ void MazeMode::PickupTreasure()
 	case EXP:
 	{
 		EventLog::Instance().LogEvent("Found exp!");
-		int exp = (std::uniform_int_distribution<int>(50, 500)(mt) * level) / 10;
+		int exp = (std::uniform_int_distribution<int>(50, 500)(mt) * level) / 2;
 		Player::Instance().GainExperience(exp);
 		break;
 	}
