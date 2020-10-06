@@ -8,6 +8,18 @@
 static constexpr int kFontSize { 800 };
 static constexpr float kFontLineSpace { 0.05f };
 
+Load< Sound::Sample > level_up_sfx_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("level_up.wav"));
+});
+
+Load< Sound::Sample > die_sfx_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("die.wav"));
+});
+
+Load< Sound::Sample > wedding_music_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("wedding.wav"));
+});
+
 enum InfoEntry : uint8_t {
     PLAYER = 0,
     LEVEL,
@@ -80,6 +92,7 @@ void Player::DrawInfo(const glm::uvec2& drawable_size)
 void Player::LevelUp()
 {
     EventLog::Instance().LogEvent("Level up!");
+    Sound::play(*level_up_sfx_sample);
     SetLevel(level_ + 1);
     int new_hp = 100 + level_ * level_ * 50;
     int new_mp = 100 + level_ * level_ * 50;
@@ -154,6 +167,7 @@ void Player::SetExp(int experience, int level_up_experience)
 
 void Player::Die()
 {
+    Sound::play(*die_sfx_sample);
     EventLog::Instance().LogEvent("You die!");
     EventLog::Instance().LogEvent("Lose half money!");
     EventLog::Instance().LogEvent("Lose half exp!");
@@ -163,8 +177,16 @@ void Player::Die()
 }
 
 bool Player::MarryPrincess() {
+    if (married_) {
+        EventLog::Instance().LogEvent("You've already");
+        EventLog::Instance().LogEvent("married princess!");
+        return false;
+    }
+
     if (money_ >= 50000) {
         EventLog::Instance().LogEvent("You married princess!");
+        Sound::play(*wedding_music_sample);
+        married_ = true;
         return true;
     } else {
         EventLog::Instance().LogEvent("Go away!");

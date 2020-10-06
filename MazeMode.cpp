@@ -18,6 +18,14 @@ static constexpr int kCircleVertexCount{20};
 static constexpr glm::u8vec4 kPlayerColor{0xbb, 0xb0, 0xe8, 0xff};
 static constexpr glm::u8vec4 kBackgroundColor{0x0f, 0x02, 0xff, 0xff};
 
+Load< Sound::Sample > treasure_sfx_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("coin.wav"));
+});
+
+Load< Sound::Sample > fight_sfx_sample(LoadTagDefault, []() -> Sound::Sample const * {
+	return new Sound::Sample(data_path("fight.wav"));
+});
+
 MazeMode::MazeMode()
 {
 }
@@ -85,6 +93,7 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			{
 			case Room::Type::EXIT:
 			{
+				Sound::play(*sound_clonk);
 				static int adventure_time = 0;
 				++adventure_time;
 				EventLog::Instance().LogEvent("Adventure succeeded!");
@@ -404,6 +413,7 @@ void MazeMode::FightMonster(int choice)
 	switch (choice)
 	{
 	case ATTACK: {
+		Sound::play(*fight_sfx_sample);
 		int damage = Player::Instance().Attack(monster_->defense_);
 		if (monster_->ApplyDamage(damage)) {
 			int money = monster_->level_ * 50;
@@ -467,6 +477,7 @@ void MazeMode::PickupTreasure()
 	map_[position_.x][position_.y].type_ = Room::Type::NORMAL;
 	UpdateRoomColor(position_);
 	dialog_system->CloseAllDialogs();
+	Sound::play(*treasure_sfx_sample);
 
 	int treasure = std::uniform_int_distribution<int>(0, 1)(mt);
 

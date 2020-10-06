@@ -20,6 +20,8 @@ private:
     int experience_ { 0 };
     int level_up_experience_ { 100 };
 
+    bool married_ { false };
+
     Dialog player_info_dialog_;
     Player();
 

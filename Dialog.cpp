@@ -4,8 +4,32 @@
 #include <fstream>
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
-#include <iostream>
+// From https://github.com/15-466/15-466-f19-base6/blob/master/MenuMode.cpp
+Load< Sound::Sample > sound_click(LoadTagDefault, []() -> Sound::Sample *{
+	std::vector< float > data(size_t(48000 * 0.2f), 0.0f);
+	for (uint32_t i = 0; i < data.size(); ++i) {
+		float t = i / float(48000);
+		//phase-modulated sine wave (creates some metal-like sound):
+		data[i] = std::sin(3.1415926f * 2.0f * 440.0f * t + std::sin(3.1415926f * 2.0f * 450.0f * t));
+		//quadratic falloff:
+		data[i] *= 0.3f * std::pow(std::max(0.0f, (1.0f - t / 0.2f)), 2.0f);
+	}
+	return new Sound::Sample(data);
+});
+
+Load< Sound::Sample > sound_clonk(LoadTagDefault, []() -> Sound::Sample *{
+	std::vector< float > data(size_t(48000 * 0.2f), 0.0f);
+	for (uint32_t i = 0; i < data.size(); ++i) {
+		float t = i / float(48000);
+		//phase-modulated sine wave (creates some metal-like sound):
+		data[i] = std::sin(3.1415926f * 2.0f * 220.0f * t + std::sin(3.1415926f * 2.0f * 200.0f * t));
+		//quadratic falloff:
+		data[i] *= 0.3f * std::pow(std::max(0.0f, (1.0f - t / 0.2f)), 2.0f);
+	}
+	return new Sound::Sample(data);
+});
 
 const std::unordered_map<std::string, glm::u8vec4> kFontColors {
     {"white", {0xff, 0xff, 0xff, 0xff}},
@@ -79,14 +103,21 @@ current_choice_(current_choice)
 void MenuDialog::NextChoice()
 {
     if (current_choice_ < max_choice_) {
+        Sound::play(*sound_click);
         texts_[current_choice_]->SetColor(font_color_);
         ++current_choice_;
     }
 }
 
+void MenuDialog::Choose()
+{
+    Sound::play(*sound_clonk);
+}
+
 void MenuDialog::PreviousChoice()
 {
     if (current_choice_ > 0) {
+        Sound::play(*sound_click);
         texts_[current_choice_]->SetColor(font_color_);
         --current_choice_;
     }
@@ -101,8 +132,6 @@ void MenuDialog::Draw(const glm::uvec2& drawable_size)
 DialogSystem::DialogSystem(const std::string& file_path)
 {
     std::ifstream f(file_path);
-
-    std::cout << file_path << std::endl;
 
     if (!f.is_open()) {
         throw std::runtime_error("Cannot open dialogs file!");

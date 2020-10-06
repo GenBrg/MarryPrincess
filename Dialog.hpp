@@ -3,6 +3,7 @@
 #include "DrawFont.hpp"
 #include "Load.hpp"
 #include "Texture2DProgram.hpp"
+#include "Sound.hpp"
 
 #include <vector>
 #include <unordered_map>
@@ -40,6 +41,7 @@ public:
 
     void NextChoice();
     void PreviousChoice();
+    void Choose();
     int GetCurrentChoice() const { return current_choice_; }
     virtual void Draw(const glm::uvec2& drawable_size) override;
 };
@@ -65,3 +67,5 @@ public:
 
 extern DialogSystem* dialog_system;
 extern const std::unordered_map<std::string, glm::u8vec4> kFontColors;
+extern Load< Sound::Sample > sound_click;
+extern Load< Sound::Sample > sound_clonk;

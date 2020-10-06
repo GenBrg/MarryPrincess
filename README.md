@@ -26,8 +26,12 @@ D: Move player right\
 Enter: Confirm
 
 Sources: 
-
-
+Menu sound: https://github.com/15-466/15-466-f19-base6/blob/master/MenuMode.cpp
+Karate Chop.m4a: https://freesound.org/people/ccolbert70Eagles23/sounds/423526/ 
+Coins - 01.wav: https://freesound.org/people/DWOBoyle/sounds/140382/
+Level Up: https://freesound.org/people/qubodup/sounds/442943/
+Die Sounds: https://freesound.org/people/vox_artist/sounds/512159/
+Wedding March Synth: http://free-loops.com/2080-wedding-march.html
 
 This game was built with [NEST](NEST.md).
 
