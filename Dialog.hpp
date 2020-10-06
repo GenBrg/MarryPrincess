@@ -24,6 +24,7 @@ public:
     virtual ~Dialog();
     void AddText(const char* text, const glm::vec2& anchor);
     void SetVisibility(bool visible) { visible_ = visible; }
+    DrawFont* GetText(int idx) { return texts_[idx]; }
     virtual void Draw(const glm::uvec2& drawable_size);
 };
 
@@ -63,3 +64,4 @@ public:
 };
 
 extern DialogSystem* dialog_system;
+extern const std::unordered_map<std::string, glm::u8vec4> kFontColors;

@@ -101,7 +101,8 @@ if $(OS) = NT { #Windows
 
 #Store the names of various .cpp files to build into variables:
 GAME_NAMES =
-	PlayMode
+	MazeMode
+	HomeMode
 	main
 	LitColorTextureProgram
 	#ColorTextureProgram #not used right now, but you might want it
@@ -125,9 +126,8 @@ COMMON_NAMES =
 	Texture2DProgram
 	Timer
 	Dialog
-	MazeMode
-	HomeMode
 	Player
+	EventLog
 	;
 
 LOCATE_TARGET = objs ; #put objects in 'objs' directory

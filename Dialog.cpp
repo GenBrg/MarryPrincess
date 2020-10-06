@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-static const std::unordered_map<std::string, glm::u8vec4> kFontColors {
+const std::unordered_map<std::string, glm::u8vec4> kFontColors {
     {"white", {0xff, 0xff, 0xff, 0xff}},
     {"black", {0x00, 0x00, 0x00, 0xff}},
     {"red", {0xff, 0x33, 0x00, 0xff}},
@@ -134,7 +134,7 @@ DialogSystem::DialogSystem(const std::string& file_path)
                 std::string current_choice_color;
                 f >> current_choice >> current_choice_color;
                 
-                dialog = new MenuDialog(font_path.c_str(), kFontColors.at(background_color), bounding_box, font_size, kFontColors.at(font_color),
+                dialog = new MenuDialog(data_path(font_path).c_str(), kFontColors.at(background_color), bounding_box, font_size, kFontColors.at(font_color),
                  dialog_num - 1, kFontColors.at(current_choice_color), current_choice);
 
                 f.get();
@@ -149,7 +149,7 @@ DialogSystem::DialogSystem(const std::string& file_path)
                     dialog->AddText(line.c_str(), anchor);
                 }
             } else {
-                dialog = new Dialog(font_path.c_str(), kFontColors.at(background_color), bounding_box, font_size, kFontColors.at(font_color));
+                dialog = new Dialog(data_path(font_path).c_str(), kFontColors.at(background_color), bounding_box, font_size, kFontColors.at(font_color));
                 
                 f.get();
                 while (dialog_num--) {

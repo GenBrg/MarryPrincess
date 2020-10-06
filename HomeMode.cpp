@@ -2,10 +2,9 @@
 #include "MazeMode.hpp"
 #include "Player.hpp"
 #include "data_path.hpp"
+#include "EventLog.hpp"
 
 #include <iostream>
-
-constexpr const char * const kFontPath { "dist\\Inkfree.ttf" };
 
 HomeMode::HomeMode()
 {
@@ -47,6 +46,7 @@ bool HomeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 								Player::Instance().Sleep();
 							break;
 							case HomeChoice::MARRY_PRINCESS:
+								EventLog::Instance().LogEvent("123!");
 								// state_ = State::PRINCESS;
 							break;
 							// case HomeChoice::BUY:
@@ -107,6 +107,8 @@ void HomeMode::draw(glm::uvec2 const &drawable_size)
 		glDisable(GL_DEPTH_TEST);
 
 		dialog_system->Draw(drawable_size);
+
+		EventLog::Instance().Draw(drawable_size);
 	}
 }
 

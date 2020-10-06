@@ -1,4 +1,5 @@
 #pragma once
+#include "Dialog.hpp"
 
 #include <glm/glm.hpp>
 
@@ -18,9 +19,11 @@ private:
     int money_ { 0 };
     int experience_ { 0 };
     int level_up_experience_ { 100 };
+
+    // Dialog player_info_dialog_;
+    Player();
     
 public:
-    Player() {}
     static Player& Instance()
     {
         static Player player;

@@ -1,5 +1,5 @@
 menu maze_monster
-dist\Inkfree.ttf
+Inkfree.ttf
 yellow
 -0.5 -0.5 -0.5 -0.9
 2000
@@ -8,7 +8,7 @@ white
 -0.3 -0.65 Attack
 -0.3 -0.75 Escape
 dialog maze_treasure
-dist\Inkfree.ttf
+Inkfree.ttf
 transparent
 -0.2 0.2 0.2 -0.2
 2000
@@ -16,7 +16,7 @@ green
 1
 -0.95 -0.95 Press Enter to get the treasure!
 dialog maze_exit
-dist\Inkfree.ttf
+Inkfree.ttf
 transparent
 -0.2 0.2 0.2 -0.2
 2000
@@ -24,7 +24,7 @@ green
 1
 -0.95 -0.95 Press Enter to exit the maze!
 menu home_choice
-dist\Inkfree.ttf
+Inkfree.ttf
 yellow
 -0.5 -0.5 -0.5 -0.9
 2000
@@ -34,7 +34,7 @@ white
 -0.3 -0.75 Marry the princess($50,000)!
 -0.3 -0.85 Adventure!
 dialog home_dialog
-dist\Inkfree.ttf
+Inkfree.ttf
 pink
 -0.5 0.5 0.5 -0.5
 2000

@@ -1,5 +1,6 @@
 #include "MazeMode.hpp"
 #include "HomeMode.hpp"
+#include "EventLog.hpp"
 
 #include "Player.hpp"
 #include "data_path.hpp"
@@ -93,7 +94,7 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 				break;
 			}
 			case Room::Type::TREASURE:
-
+				PickupTreasure();
 				break;
 			default:;
 			}
@@ -142,6 +143,12 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 
 		// Draw dialogs
 		dialog_system->Draw(drawable_size);
+
+		// Draw player info
+
+		// Draw event info
+		EventLog::Instance().Draw(drawable_size);
+		
 	}
 }
 
@@ -421,5 +428,12 @@ void MazeMode::UpdateRoomColor(const glm::uvec2& pos)
 
 void MazeMode::Exit()
 {
+	dialog_system->CloseAllDialogs();
+}
+
+void MazeMode::PickupTreasure()
+{
+	map_[position_.x][position_.y].type_ = Room::Type::NORMAL;
+	UpdateRoomColor(position_);
 	dialog_system->CloseAllDialogs();
 }
