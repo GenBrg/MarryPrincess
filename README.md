@@ -1,10 +1,17 @@
-# (TODO: your game's title)
+# Marry Princess
 
-Author: (TODO: your name)
+Author: Jiasheng Zhou \<jiashen2@andrew.cmu.edu\>
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: 
 
-Text Drawing: (TODO: how does the text drawing in this game work? Is text precomputed? Rendered at runtime? What files or utilities are involved?)
+In this game, you need to adventure in the maze and get enough money to marry the princess. There are treasure and monster in the cave. The maze, treasure and monsters are all random.
+
+Text Drawing: 
+
+All the text are generated as follows: the 2d textures for the text are generated once when you set the text using SetText method in DrawFont class. The shaping and position are calculated on each draw call. Each glyph is displayed by 4 vertexes containing the position and texture calculated before.
+
+There is dialog and menu loading where .dialogs file contains all the static dialogs in the game and .showdialog file contains the initial dialogs shown in one scene.
+
 
 Screen Shot:
 
@@ -12,9 +19,15 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+W: Move player up / previous dialog\
+A: Move player left\
+S: Move player down / next dialog\
+D: Move player right\
+Enter: Confirm
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: 
+
+
 
 This game was built with [NEST](NEST.md).
 

@@ -472,7 +472,7 @@ void MazeMode::PickupTreasure()
 
 	enum Treasure : uint8_t
 	{
-		MONEY,
+		MONEY = 0,
 		EXP
 	};
 

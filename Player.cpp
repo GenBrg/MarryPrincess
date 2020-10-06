@@ -188,7 +188,7 @@ bool Player::ApplyDamage(int attack)
     oss << "Player received " << damage << " damage!";
     EventLog::Instance().LogEvent(oss.str());
 
-    if (hp_ <= 0) {
+    if (new_hp <= 0) {
         Die();
         return true;
     } else {
