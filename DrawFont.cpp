@@ -53,16 +53,16 @@ void DrawFont::Draw(const glm::uvec2 &drawable_size)
 
 		auto &bitmap = slot->bitmap;
 
-		float start_x = GetOpenGLPos(cursor_x + x_offset, drawable_size.x);
-		float start_y = GetOpenGLPos(cursor_y + y_offset, drawable_size.y);
+		float start_x = GetOpenGLPos(cursor_x + x_offset + slot->bitmap_left, drawable_size.x);
+		float start_y = GetOpenGLPos(cursor_y + y_offset + slot->bitmap_top, drawable_size.y);
 		float end_x = start_x + bitmap.width * 2.0f / drawable_size.x;
-		float end_y = start_y + bitmap.rows * 2.0f / drawable_size.y;
+		float end_y = start_y - bitmap.rows * 2.0f / drawable_size.y;
 
 		Texture2DProgram::Vertex vertexes[]{
-			{{start_x, start_y}, color_, {0, 1}},
-			{{end_x, start_y}, color_, {1, 1}},
-			{{start_x, end_y}, color_, {0, 0}},
-			{{end_x, end_y}, color_, {1, 0}}};
+			{{start_x, start_y}, color_, {0, 0}},
+			{{end_x, start_y}, color_, {1, 0}},
+			{{start_x, end_y}, color_, {0, 1}},
+			{{end_x, end_y}, color_, {1, 1}}};
 
 		GLuint texture_id = texture_ids_[i];
 		GLuint vertex_buffer, vertex_array;

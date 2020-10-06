@@ -6,21 +6,22 @@
 
 #include <string>
 
-class EventLog {
+class EventLog
+{
 private:
-    Dialog event_dialog_;
-    int entry_num_ { 0 };
-    int replace_pointer_ { 0 };
+	Dialog event_dialog_;
+	int entry_num_{0};
+	int replace_pointer_{0};
 
-    EventLog();
+	EventLog();
 
 public:
-    static EventLog& Instance() 
-    {
-        static EventLog event_log;
-        return event_log;
-    }
+	static EventLog &Instance()
+	{
+		static EventLog event_log;
+		return event_log;
+	}
 
-    void LogEvent(const std::string& log);
-    void Draw(const glm::uvec2& drawable_size);
+	void LogEvent(const std::string &log);
+	void Draw(const glm::uvec2 &drawable_size);
 };
