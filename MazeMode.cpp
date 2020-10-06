@@ -5,7 +5,6 @@
 #include "Player.hpp"
 #include "data_path.hpp"
 
-#include <iostream>
 #include <stack>
 #include <random>
 #include <set>
@@ -235,23 +234,6 @@ void MazeMode::GenerateMaze()
 		}
 	}
 
-	// for (int i = 0; i < kMazeHeight; ++i) {
-
-	// 	for (int j = 0; j < kMazeWidth; ++j) {
-	// 		int connect = Room::Flag::CONNECT_UP;
-	// 		for (int k = 0; k < 4; k++) {
-	// 			if (map_[i][j].flag_ & connect) {
-	// 				std::cout << "1";
-	// 			} else {
-	// 				std::cout << "0";
-	// 			}
-	// 			connect <<= 1;
-	// 		}
-	// 		std::cout << " ";
-	// 	}
-	// 	std::cout << std::endl;
-	// }
-
 	// Select treasure room, monster room, etc...
 	std::uniform_int_distribution<int> special_room_dist(1, kMazeHeight * kMazeWidth - 1);
 	std::set<int> room_set;
@@ -288,21 +270,8 @@ void MazeMode::GenerateMaze()
 			Room &room = map_[i][j];
 			UpdateRoomColor(glm::uvec2(i, j));
 
-			// if (!(room.flag_ & Room::Flag::CONNECT_UP)) {
-			// 	texture2d_program->SetBox(room.wall_drawables_[0],
-			// 	glm::vec4(
-			// 		kMazeStartPos[0] + j * Room::kRoomSize,
-			// 		kMazeStartPos[1] - i * Room::kRoomSize,
-			// 		kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
-			// 		kMazeStartPos[1] - (i * Room::kRoomSize + Room::kWallSize)
-			// 	),
-			// 	Room::kWallColor);
-			// }
-
-			// std::cout << i << " " << j << std::endl;
 			if (!(room.flag_ & Room::Flag::CONNECT_RIGHT))
 			{
-				// std::cout << "right!" << std::endl;
 				texture2d_program->SetBox(room.wall_drawables_[0],
 										  glm::vec4(
 											  kMazeStartPos[0] + (j + 1) * Room::kRoomSize - Room::kWallSize,
@@ -314,7 +283,6 @@ void MazeMode::GenerateMaze()
 
 			if (!(room.flag_ & Room::Flag::CONNECT_DOWN))
 			{
-				// std::cout << "down!" << std::endl;
 				texture2d_program->SetBox(room.wall_drawables_[1],
 										  glm::vec4(
 											  kMazeStartPos[0] + j * Room::kRoomSize,
@@ -323,17 +291,6 @@ void MazeMode::GenerateMaze()
 											  kMazeStartPos[1] - (i + 1) * Room::kRoomSize),
 										  Room::kWallColor);
 			}
-
-			// if (!(room.flag_ & Room::Flag::CONNECT_LEFT)) {
-			// 	texture2d_program->SetBox(room.wall_drawables_[3],
-			// 	glm::vec4(
-			// 		kMazeStartPos[0] + j * Room::kRoomSize,
-			// 		kMazeStartPos[1] - i * Room::kRoomSize,
-			// 		kMazeStartPos[0] + j * Room::kRoomSize + Room::kWallSize,
-			// 		kMazeStartPos[1] - (i + 1) * Room::kRoomSize
-			// 	),
-			// 	Room::kWallColor);
-			// }
 		}
 	}
 }

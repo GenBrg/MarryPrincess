@@ -4,8 +4,6 @@
 #include "data_path.hpp"
 #include "EventLog.hpp"
 
-#include <iostream>
-
 HomeMode::HomeMode()
 {
 	Initialize();
