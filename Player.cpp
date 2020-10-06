@@ -20,8 +20,8 @@ enum InfoEntry : uint8_t {
 };
 
 void Player::Sleep() {
-    SetHP(hp_, max_hp_);
-    SetMP(mp_, max_mp_);
+    SetHP(max_hp_, max_hp_);
+    SetMP(max_mp_, max_mp_);
     EventLog::Instance().LogEvent("You restored all your");
     EventLog::Instance().LogEvent("hp and mp!");
 }
@@ -176,10 +176,6 @@ int Player::Attack(int defense)
 {
     int damage = std::max(attack_ - defense, 1);
 
-    std::ostringstream oss;
-    oss << "Deal " << damage << " Damage!";
-    EventLog::Instance().LogEvent(oss.str());
-
     return damage;
 }
 
@@ -189,7 +185,7 @@ bool Player::ApplyDamage(int attack)
     int new_hp = hp_ - damage;
 
     std::ostringstream oss;
-    oss << "Receive " << damage << " Damage!";
+    oss << "Player received " << damage << " damage!";
     EventLog::Instance().LogEvent(oss.str());
 
     if (hp_ <= 0) {

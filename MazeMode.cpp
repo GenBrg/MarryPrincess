@@ -9,6 +9,7 @@
 #include <stack>
 #include <random>
 #include <set>
+#include <sstream>
 
 std::shared_ptr<MazeMode> mazemode;
 
@@ -83,8 +84,15 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			switch (current_room.type_)
 			{
 			case Room::Type::EXIT:
+			{
+				static int adventure_time = 0;
+				++adventure_time;
+				EventLog::Instance().LogEvent("Adventure succeeded!");
+				Player::Instance().GainMoney(adventure_time * 100);
+				Player::Instance().GainExperience(adventure_time * 50);
 				Exit();
 				break;
+			}
 			case Room::Type::MONSTER:
 			{
 				int current_choice = dynamic_cast<MenuDialog *>(dialog_system->GetDialog("maze_monster"))->GetCurrentChoice();
@@ -144,6 +152,11 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 
 		// Draw player info
 		Player::Instance().DrawInfo(drawable_size);
+
+		// Draw monster info
+		if (monster_) {
+			monster_->info_dialog_.Draw(drawable_size);
+		}
 
 		// Draw event info
 		EventLog::Instance().Draw(drawable_size);
@@ -359,6 +372,7 @@ void MazeMode::EnterRoom(int direction)
 				break;
 			case Room::Type::MONSTER:
 				dialog_system->ShowDialogs(std::vector<std::string>{"maze_monster"});
+				monster_ = new Monster(Player::Instance().GetLevel());
 				break;
 			default:;
 			}
@@ -377,6 +391,8 @@ void MazeMode::FightMonster(int choice)
 		current_room.type_ = Room::Type::NORMAL;
 		dialog_system->CloseAllDialogs();
 		UpdateRoomColor(position_);
+		delete monster_;
+		monster_ = nullptr;
 	};
 
 	enum Choice
@@ -387,9 +403,18 @@ void MazeMode::FightMonster(int choice)
 
 	switch (choice)
 	{
-	case ATTACK:
-
+	case ATTACK: {
+		int damage = Player::Instance().Attack(monster_->defense_);
+		if (monster_->ApplyDamage(damage)) {
+			int money = monster_->level_ * 50;
+			int exp = monster_->level_ * 20;
+			Player::Instance().GainMoney(money);
+			Player::Instance().GainExperience(exp);
+			fight_succeed();
+			return;
+		}
 		break;
+	}
 	case ESCAPE:
 		if (std::uniform_int_distribution<int>(1, 10)(mt) <= 3)
 		{
@@ -404,10 +429,12 @@ void MazeMode::FightMonster(int choice)
 	}
 
 	// Monster attack you
-
-	// End fight if you die
-
-	// Or succeed
+	if (Player::Instance().ApplyDamage(monster_->attack_))
+	{
+		delete monster_;
+		monster_ = nullptr;
+		Exit();
+	}
 }
 
 void MazeMode::UpdateRoomColor(const glm::uvec2 &pos)
@@ -448,7 +475,7 @@ void MazeMode::PickupTreasure()
 		MONEY,
 		EXP
 	};
-	
+
 	int level = Player::Instance().GetLevel();
 	switch (treasure)
 	{
@@ -469,4 +496,60 @@ void MazeMode::PickupTreasure()
 
 	default:;
 	}
+}
+
+MazeMode::Monster::Monster(int player_level) :
+info_dialog_(data_path("ariblk.ttf").c_str(), kFontColors.at("black"), glm::vec4(-0.9f, 0.8f, -0.7f, 0.5f), kFontSize, kFontColors.at("white"))
+{
+	info_dialog_.SetVisibility(true);
+
+    std::ostringstream oss;
+    glm::vec2 anchor { -0.89f, 0.75f };
+	info_dialog_.AddText("Monster", anchor);
+
+	std::random_device rd;
+	std::mt19937 mt { rd() };
+	level_ = std::max(1, std::uniform_int_distribution<int>(-3, 3)(mt) + player_level);
+
+	anchor[1] -= kFontLineSpace;
+    oss.str("");
+    oss << "Level: " << level_;
+    info_dialog_.AddText(oss.str().c_str(), anchor);
+
+	hp_ = std::max(1, static_cast<int>((std::uniform_real_distribution<float>(-2.0f, 2.0f)(mt) + 10.0f) * level_));
+	anchor[1] -= kFontLineSpace;
+    oss.str("");
+    oss << "HP: " << hp_;
+    info_dialog_.AddText(oss.str().c_str(), anchor);
+
+	attack_ = std::max(1, 5 + level_ * 3 + std::uniform_int_distribution<int>(-5, 5)(mt));
+	anchor[1] -= kFontLineSpace;
+    oss.str("");
+    oss << "Attack: " << attack_;
+    info_dialog_.AddText(oss.str().c_str(), anchor);
+
+	defense_ = std::max(1, 5 + level_ * 3 + std::uniform_int_distribution<int>(-5, 5)(mt));
+	anchor[1] -= kFontLineSpace;
+    oss.str("");
+    oss << "Defense: " << defense_;
+    info_dialog_.AddText(oss.str().c_str(), anchor);
+}
+
+bool MazeMode::Monster::ApplyDamage(int damage)
+{
+	std::ostringstream oss;
+    oss << "Monster received " << damage << " damage!";
+    EventLog::Instance().LogEvent(oss.str());
+
+	hp_ -= damage;
+	if (hp_ <= 0) {
+		info_dialog_.SetVisibility(false);
+		return true;
+	}
+
+	oss.str("");
+    oss << "HP: " << hp_;
+    info_dialog_.GetText(2)->SetText(oss.str().c_str(), kFontSize);
+
+	return false;
 }

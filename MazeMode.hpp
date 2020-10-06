@@ -38,12 +38,20 @@ struct MazeMode : Mode
 
 	struct Monster
 	{
+		inline static constexpr int kFontSize { 800 };
+		inline static constexpr float kFontLineSpace { 0.05f };
 		int level_;
 		int hp_;
 		int attack_;
 		int defense_;
-		int exp_;
+
+		Dialog info_dialog_;
+		
+		Monster(int player_level);
+		bool ApplyDamage(int damage);
 	};
+
+	Monster* monster_ { nullptr };
 
 	struct Room
 	{
