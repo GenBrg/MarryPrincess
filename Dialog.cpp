@@ -93,9 +93,9 @@ void Dialog::Draw(const glm::uvec2& drawable_size)
 MenuDialog::MenuDialog(const char* font_path, const glm::u8vec4& background_color, const glm::vec4& bounding_box, FT_F26Dot6 font_size, const glm::u8vec4& font_color, 
     int max_choice, const glm::u8vec4& current_choice_color, int current_choice) :
 Dialog(font_path, background_color, bounding_box, font_size, font_color),
+current_choice_(current_choice),
 max_choice_(max_choice),
-current_choice_color_(current_choice_color),
-current_choice_(current_choice)
+current_choice_color_(current_choice_color)
 {
     assert(max_choice_ > 0 && 0 <= current_choice_ && current_choice_ <= max_choice_);
 }
@@ -202,14 +202,14 @@ DialogSystem::DialogSystem(const std::string& file_path)
 
 DialogSystem::~DialogSystem()
 {
-    for (auto& [label, dialog] : dialogs_) {
+    for (auto& [_, dialog] : dialogs_) {
         delete dialog;
     }
 }
 
 void DialogSystem::CloseAllDialogs()
 {
-    for (auto& [label, dialog] : dialogs_) {
+    for (auto& [_, dialog] : dialogs_) {
         dialog->SetVisibility(false);
     }
 }
@@ -253,7 +253,7 @@ void DialogSystem::ShowDialogs(const std::string& file_path)
 
 void DialogSystem::Draw(const glm::uvec2& drawable_size) const
 {
-    for (auto& [label, dialog] : dialogs_) {
+    for (auto& [_, dialog] : dialogs_) {
         dialog->Draw(drawable_size);
     }
 }

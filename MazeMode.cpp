@@ -15,7 +15,6 @@ std::shared_ptr<MazeMode> mazemode;
 static constexpr float kPlayerDrawableRadius{0.02f};
 static constexpr int kCircleVertexCount{20};
 static constexpr glm::u8vec4 kPlayerColor{0xbb, 0xb0, 0xe8, 0xff};
-static constexpr glm::u8vec4 kBackgroundColor{0x0f, 0x02, 0xff, 0xff};
 
 Load< Sound::Sample > treasure_sfx_sample(LoadTagDefault, []() -> Sound::Sample const * {
 	return new Sound::Sample(data_path("coin.wav"));
@@ -27,6 +26,12 @@ Load< Sound::Sample > fight_sfx_sample(LoadTagDefault, []() -> Sound::Sample con
 
 MazeMode::MazeMode()
 {
+	texture2d_program->SetBox(maze_background_drawable_,
+	 glm::vec4(kMazeStartPos[0] - Room::kWallSize,
+	  			kMazeStartPos[1] + Room::kWallSize,
+				  kMazeStartPos[0] + kMazeWidth * Room::kRoomSize,
+				  kMazeStartPos[1] - kMazeHeight * Room::kRoomSize),
+	  Room::kWallColor);
 }
 
 MazeMode::~MazeMode()
@@ -142,6 +147,9 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 
 	{ //use DrawLines to overlay some text:
 		glDisable(GL_DEPTH_TEST);
+
+		// Draw maze background
+		texture2d_program->DrawBox(maze_background_drawable_);
 
 		// Draw maze
 		for (auto &row : map_)

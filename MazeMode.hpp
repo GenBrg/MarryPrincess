@@ -99,6 +99,7 @@ struct MazeMode : Mode
 	Room map_[kMazeHeight][kMazeWidth];
 	glm::uvec2 position_;
 	Texture2DProgram::CircleDrawable player_pos_drawable_;
+	Texture2DProgram::BoxDrawable maze_background_drawable_;
 
 	MazeMode();
 	virtual ~MazeMode();
