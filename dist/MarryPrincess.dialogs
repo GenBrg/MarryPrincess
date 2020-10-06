@@ -1,9 +1,9 @@
 menu maze_monster
 Inkfree.ttf
 yellow
--0.5 -0.5 -0.5 -0.9
+-0.35 -0.55 0.25 -0.8
 2000
-white
+blue
 2 0 red
 -0.3 -0.65 Attack
 -0.3 -0.75 Escape
@@ -26,9 +26,9 @@ green
 menu home_choice
 Inkfree.ttf
 yellow
--0.5 -0.5 -0.5 -0.9
+-0.35 -0.55 0.35 -0.9
 2000
-white
+blue
 3 0 red
 -0.3 -0.65 Sleep
 -0.3 -0.75 Marry the princess($50,000)!

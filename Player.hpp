@@ -12,7 +12,7 @@ private:
     int max_mp_{ 100 };
 
     int attack_{ 10 };
-    int intelligence_{ 10 };
+    // int intelligence_{ 10 };
     int defense_{ 10 };
     
     int level_ { 1 };
