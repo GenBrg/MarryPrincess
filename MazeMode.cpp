@@ -84,8 +84,6 @@ bool MazeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 			{
 			case Room::Type::EXIT:
 				Exit();
-				homemode->Initialize();
-				Mode::set_current(homemode);
 				break;
 			case Room::Type::MONSTER:
 			{
@@ -145,10 +143,10 @@ void MazeMode::draw(glm::uvec2 const &drawable_size)
 		dialog_system->Draw(drawable_size);
 
 		// Draw player info
+		Player::Instance().DrawInfo(drawable_size);
 
 		// Draw event info
 		EventLog::Instance().Draw(drawable_size);
-		
 	}
 }
 
@@ -375,7 +373,7 @@ void MazeMode::FightMonster(int choice)
 	auto fight_succeed = [&]() {
 		int i = position_.x;
 		int j = position_.y;
-		Room& current_room = map_[i][j];
+		Room &current_room = map_[i][j];
 		current_room.type_ = Room::Type::NORMAL;
 		dialog_system->CloseAllDialogs();
 		UpdateRoomColor(position_);
@@ -395,9 +393,11 @@ void MazeMode::FightMonster(int choice)
 	case ESCAPE:
 		if (std::uniform_int_distribution<int>(1, 10)(mt) <= 3)
 		{
+			EventLog::Instance().LogEvent("Escape succeed!");
 			fight_succeed();
 			return;
 		}
+		EventLog::Instance().LogEvent("Escape failed!");
 		break;
 	default:
 		throw std::runtime_error("Unknown fight monster option!");
@@ -410,30 +410,63 @@ void MazeMode::FightMonster(int choice)
 	// Or succeed
 }
 
-void MazeMode::UpdateRoomColor(const glm::uvec2& pos)
+void MazeMode::UpdateRoomColor(const glm::uvec2 &pos)
 {
 	int i = pos.x;
 	int j = pos.y;
-	Room& current_room = map_[i][j];
+	Room &current_room = map_[i][j];
 	texture2d_program->SetBox(current_room.room_drawable_,
-								glm::vec4(
-									kMazeStartPos[0] + j * Room::kRoomSize,
-									kMazeStartPos[1] - i * Room::kRoomSize,
-									kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
-									kMazeStartPos[1] - (i + 1) * Room::kRoomSize),
+							  glm::vec4(
+								  kMazeStartPos[0] + j * Room::kRoomSize,
+								  kMazeStartPos[1] - i * Room::kRoomSize,
+								  kMazeStartPos[0] + (j + 1) * Room::kRoomSize,
+								  kMazeStartPos[1] - (i + 1) * Room::kRoomSize),
 
-								Room::kRoomColors[static_cast<int>(current_room.type_)]);
-
+							  Room::kRoomColors[static_cast<int>(current_room.type_)]);
 }
 
 void MazeMode::Exit()
 {
 	dialog_system->CloseAllDialogs();
+	homemode->Initialize();
+	Mode::set_current(homemode);
 }
 
 void MazeMode::PickupTreasure()
 {
+	std::random_device rd;
+	std::mt19937 mt{rd()};
+
 	map_[position_.x][position_.y].type_ = Room::Type::NORMAL;
 	UpdateRoomColor(position_);
 	dialog_system->CloseAllDialogs();
+
+	int treasure = std::uniform_int_distribution<int>(0, 1)(mt);
+
+	enum Treasure : uint8_t
+	{
+		MONEY,
+		EXP
+	};
+	
+	int level = Player::Instance().GetLevel();
+	switch (treasure)
+	{
+	case MONEY:
+	{
+		EventLog::Instance().LogEvent("Found money!");
+		int money = (std::uniform_int_distribution<int>(50, 500)(mt) * level) / 2;
+		Player::Instance().GainMoney(money);
+		break;
+	}
+	case EXP:
+	{
+		EventLog::Instance().LogEvent("Found exp!");
+		int exp = (std::uniform_int_distribution<int>(50, 500)(mt) * level) / 10;
+		Player::Instance().GainExperience(exp);
+		break;
+	}
+
+	default:;
+	}
 }

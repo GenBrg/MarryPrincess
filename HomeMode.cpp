@@ -46,7 +46,9 @@ bool HomeMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 								Player::Instance().Sleep();
 							break;
 							case HomeChoice::MARRY_PRINCESS:
-								EventLog::Instance().LogEvent("123!");
+								if (Player::Instance().MarryPrincess()) {
+									
+								}
 								// state_ = State::PRINCESS;
 							break;
 							// case HomeChoice::BUY:
@@ -109,6 +111,8 @@ void HomeMode::draw(glm::uvec2 const &drawable_size)
 		dialog_system->Draw(drawable_size);
 
 		EventLog::Instance().Draw(drawable_size);
+
+		Player::Instance().DrawInfo(drawable_size);
 	}
 }
 

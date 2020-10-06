@@ -5,23 +5,33 @@
 
 class Player {
 private:
-    float hp_ { 100.0f };
-    float max_hp_{ 100.0f };
+    int hp_ { 100 };
+    int max_hp_{ 100 };
 
-    float mp_{ 100.0f };
-    float max_mp_{ 100.0f };
+    int mp_{ 100 };
+    int max_mp_{ 100 };
 
-    float attack_{ 10.0f };
-    float intelligence_{ 10.0f };
-    float defence_{ 10.0f };
+    int attack_{ 10 };
+    int intelligence_{ 10 };
+    int defense_{ 10 };
     
     int level_ { 1 };
     int money_ { 0 };
     int experience_ { 0 };
     int level_up_experience_ { 100 };
 
-    // Dialog player_info_dialog_;
+    Dialog player_info_dialog_;
     Player();
+
+    void LevelUp();
+    void SetHP(int hp, int max_hp);
+    void SetMP(int mp, int max_mp);
+    void SetAttack(int attack);
+    void SetDefense(int defense);
+    void SetLevel(int level);
+    void SetMoney(int money);
+    void SetExp(int experience, int level_up_experience);
+    void Die();
     
 public:
     static Player& Instance()
@@ -32,4 +42,11 @@ public:
 
     void DrawInfo(const glm::uvec2& drawable_size);
     void Sleep();
+
+    bool MarryPrincess();
+    int Attack(int defense);
+    bool ApplyDamage(int attack);
+    void GainExperience(int exp);
+    void GainMoney(int money);
+    int GetLevel() const { return level_; }
 };
