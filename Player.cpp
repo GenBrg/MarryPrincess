@@ -94,10 +94,10 @@ void Player::LevelUp()
     EventLog::Instance().LogEvent("Level up!");
     Sound::play(*level_up_sfx_sample);
     SetLevel(level_ + 1);
-    int new_hp = 100 + level_ * level_ * 50;
-    int new_mp = 100 + level_ * level_ * 50;
-    int new_attack = 10 + level_ * level_;
-    int new_defense = 10 + level_ * level_;
+    int new_hp = 100 + level_ * 50;
+    int new_mp = 100 + level_ * 50;
+    int new_attack = 10 + level_ * 3;
+    int new_defense = 10 + level_ * 3;
     int new_exp = 100 + level_ * level_ * 100;
     SetHP(new_hp, new_hp);
     SetMP(new_mp, new_mp);

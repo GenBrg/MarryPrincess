@@ -533,13 +533,13 @@ info_dialog_(data_path("ariblk.ttf").c_str(), kFontColors.at("black"), glm::vec4
     oss << "HP: " << hp_;
     info_dialog_.AddText(oss.str().c_str(), anchor);
 
-	attack_ = std::max(1, 5 + level_ * 3 + std::uniform_int_distribution<int>(-5, 5)(mt));
+	attack_ = std::max(1, 15 + level_ * 3 + std::uniform_int_distribution<int>(-level_ - 5, level_ + 5)(mt));
 	anchor[1] -= kFontLineSpace;
     oss.str("");
     oss << "Attack: " << attack_;
     info_dialog_.AddText(oss.str().c_str(), anchor);
 
-	defense_ = std::max(1, 5 + level_ * 3 + std::uniform_int_distribution<int>(-5, 5)(mt));
+	defense_ = std::max(1, 10 + level_ + std::uniform_int_distribution<int>(-level_ - 5, level_ + 5)(mt));
 	anchor[1] -= kFontLineSpace;
     oss.str("");
     oss << "Defense: " << defense_;
